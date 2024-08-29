@@ -3,7 +3,7 @@ import Link from 'next/link';
 
 const DashboardSidebar = () => {
   return (
-    <aside className="w-48 sm:w-28 bg-gray-900 ">
+    <aside className="w-48 bg-gray-900 ">
       <nav>
         <ul className="space-y-2">
           <li>

@@ -11,7 +11,7 @@ const Study = () => {
     <div className="flex h-full">
       <DashboardSidebar />
       <div className="flex-1 p-6 overflow-auto">
-        <h1 className="text-2xl font-bold mb-4">Study Mode</h1>
+        <h1 className="text-p  mb-4">Study Mode</h1>
         <p className="mb-4">Welcome to the study page, {user?.firstName || 'User'}!</p>
         <div className="bg-gray-800 p-4 rounded-lg">
           <h2 className="text-xl font-semibold mb-2">Your Flashcard Sets</h2>

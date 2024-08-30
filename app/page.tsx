@@ -7,9 +7,13 @@ import Footer from '../components/Footer'
 const Home: React.FC = () => {
   return (
     <>
-      <Hero />
-      <Features />
-      <Pricing />
+      <main className="relative flex justify-center items-center flex-col mx-auto sm:px-10 px-5">
+        <div className="max-w-7xl w-full">
+        <Hero />
+        <Features />
+        <Pricing />
+        </div>
+      </main>
       <Footer />
     </>
   )

@@ -13,11 +13,11 @@ const StudyPage = () => {
 
   return (
     <>
-      <span className="">Welcome, {user.firstName || 'Student'}!</span>
-      <span className="font-bold text-2xl">Let's Study</span>
+      <span className="">Welcome, {user.firstName}!</span>
+      <span className="font-bold text-2xl">Let&apos;s Study</span>
       <div className="border-dashed border-zinc-500 w-full h-12"></div>
       <div className="border-dashed border-zinc-500 w-full h-64"></div>
-
+      
       <StudyContent />
     </>
   );

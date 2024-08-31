@@ -17,7 +17,6 @@ const NavBar: React.FC = () => {
           </div>
           <div className="hidden md:block">
             <div className="ml-10 flex items-baseline space-x-4">
-              <Link href="/support" className="hover:text-gray-300 transition duration-300">Support Bot</Link>
               {isSignedIn && (
                 <Link href="/dashboard" className="hover:text-gray-300 transition duration-300">Dashboard</Link>
               )}

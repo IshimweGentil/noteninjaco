@@ -1,15 +1,31 @@
 'use client';
 
-import React, { useState } from 'react'
-import Link from 'next/link'
+import React, { useState } from 'react';
+import Link from 'next/link';
 import { SignInButton, SignUpButton, UserButton, useUser } from "@clerk/nextjs";
+import useScroll from '@/hooks/use-scroll';
+import { cn } from '@/lib/utils';
+import { useSelectedLayoutSegment } from 'next/navigation';
 
 const NavBar: React.FC = () => {
-  const { isSignedIn, user } = useUser();
+  const { isSignedIn } = useUser();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
+  const scrolled = useScroll(5);
+  const selectedLayout = useSelectedLayoutSegment();
+
+  const isDashboardRoute = selectedLayout?.startsWith('dashboard');
+
   return (
-    <nav className="bg-gray-900 text-white">
+    <nav
+      className={cn(
+        "sticky inset-x-0 top-0 z-30 w-full transition-all text-white",
+        {
+          "border-b border-gray-800 bg-gray-900/75 backdrop-blur-lg": scrolled,
+          "border-b border-gray-800": isDashboardRoute,
+        }
+      )}
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center">
@@ -19,7 +35,7 @@ const NavBar: React.FC = () => {
             <div className="ml-10 flex items-baseline space-x-4">
               <Link href="/" className="hover:text-gray-300 transition duration-300">Home</Link>
               {isSignedIn && (
-                <Link href="/dashboard" className="hover:text-gray-300 transition duration-300">Dashboard</Link>
+                <Link href="/dashboard/generate" className="hover:text-gray-300 transition duration-300">Dashboard</Link>
               )}
               {!isSignedIn && (
                 <>
@@ -93,7 +109,7 @@ const NavBar: React.FC = () => {
         </div>
       )}
     </nav>
-  )
+  );
 }
 
-export default NavBar
+export default NavBar;

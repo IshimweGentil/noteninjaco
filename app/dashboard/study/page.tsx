@@ -13,7 +13,7 @@ const StudyPage = () => {
 
   return (
     <>
-      <span className="">Welcome, {user.firstName}!</span>
+      {/* eslint-disable-next-line react/no-unescaped-entities */}
       <span className="font-bold text-2xl">Let&apos;s Study</span>
       <div className="border-dashed border-zinc-500 w-full h-12"></div>
       <div className="border-dashed border-zinc-500 w-full h-64"></div>

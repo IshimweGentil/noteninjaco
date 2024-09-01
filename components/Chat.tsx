@@ -8,113 +8,150 @@ import {
   IconButton,
   Container,
 } from "@mui/material";
-import { useChat } from "ai/react";
+import { useChat } from 'ai/react';
 import { marked } from "marked";
+import { useState, useEffect, useRef, KeyboardEvent } from "react";
 import SendIcon from "@mui/icons-material/Send";
-import React, { useState, useEffect } from "react";
 
-export function Chat() {
-  const { messages, input, handleInputChange, handleSubmit } = useChat({
+interface ChatProps {
+  isVisible: boolean;
+  setIsVisible: (isVisible: boolean) => void;
+  closeChat: () => void;
+}
+
+// Define the Message type to match the expected structure
+interface Message {
+  id: string;
+  role: "function" | "assistant" | "system" | "user" | "data" | "tool"; // Adjusted role type
+  content: string;
+}
+
+export function Chat({ isVisible, setIsVisible, closeChat }: ChatProps) {
+  // Update the persistentMessages state to use the Message type
+  const [persistentMessages, setPersistentMessages] = useState<Message[]>([
+    {
+      id: "1",
+      role: "assistant",
+      content: "Hello! I am the AI Customer Support Agent at NoteNinja. How can I assist you today?",
+    },
+  ]);
+
+  const { messages, input, handleInputChange, handleSubmit, setMessages } = useChat({
     api: "api/chat",
     onError: (e) => {
       console.log(e);
     },
+    onFinish: (message) => {
+      setPersistentMessages(prevMessages => [...prevMessages, message]);
+    },
   });
 
-  const [initialMessages, setInitialMessages] = useState([
-    {
-      id: "1",
-      role: "assistant",
-      content:
-        "Hello! I am the AI Customer Support Agent at NoteNinja. How can I assist you today?",
-    },
-  ]);
+  const chatRef = useRef<HTMLDivElement>(null);
+  const [chatHeight, setChatHeight] = useState(250);
 
-  // Combine initialMessages with any new messages
-  const combinedMessages = [...initialMessages, ...messages];
+  useEffect(() => {
+    setMessages(persistentMessages);
+  }, [persistentMessages]); // Added dependency to ensure updates
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (chatRef.current && !chatRef.current.contains(event.target as Node)) {
+        closeChat();
+      }
+    };
+
+    if (isVisible) {
+      document.addEventListener("mousedown", handleClickOutside);
+      document.body.style.cursor = 'pointer';
+    } else {
+      document.body.style.cursor = 'default';
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.body.style.cursor = 'default';
+    };
+  }, [isVisible, closeChat]);
+
+  useEffect(() => {
+    const newHeight = Math.min(250 + persistentMessages.length * 40, 500);
+    setChatHeight(newHeight);
+  }, [persistentMessages]);
+
+  const handleSubmitWrapper = (e?: React.FormEvent<HTMLFormElement>) => {
+    if (e) e.preventDefault();
+    handleSubmit(e as React.FormEvent<HTMLFormElement>);
+    setPersistentMessages(prevMessages => [...prevMessages, { id: String(Date.now()), role: "user", content: input }]);
+  };
+
+  const handleKeyPress = (e: KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSubmitWrapper();
+    }
+  };
 
   return (
-    <Container sx={{ flexGrow: 1, py: 3, height: "550px", width: "400px", position: "fixed", right: 0, bottom: 0, mb: "5.5rem", zIndex: 999 }}>
-      <Stack
-        direction={"column"}
-        spacing={2}
-        flexGrow={1}
-        sx={{
-          bgcolor: "grey.100",
-          borderRadius: 2,
-          boxShadow: 3,
-          overflow: "hidden",
-          height: "100%",
-          maxHeight: "100%",
-        }}
-      >
-        <Box sx={{ overflowY: "auto", px: 3, py: 2, flexGrow: 1 }}>
-          {combinedMessages.map((message, index) => {
+    <div
+      ref={chatRef}
+      className={`fixed bottom-0 right-0 mb-4 mr-4 w-11/12 sm:w-3/4 md:w-2/3 lg:w-1/2 xl:w-1/3 max-w-md bg-gray-600/30 border border-gray-900 backdrop-blur-md rounded-lg shadow-lg overflow-hidden z-50 transition-all duration-500 ease-in-out ${
+        isVisible
+          ? 'opacity-100 translate-y-0'
+          : 'opacity-0 translate-y-full pointer-events-none'
+      }`}
+      style={{ height: `${chatHeight}px`, maxHeight: 'calc(100vh - 5rem)', cursor: 'default' }}
+      onMouseEnter={() => { document.body.style.cursor = 'default'; }}
+      onMouseLeave={() => { if (isVisible) document.body.style.cursor = 'pointer'; }}
+    >
+      <div className="flex flex-col h-full">
+        <div className="flex-1 overflow-y-auto p-3">
+          {persistentMessages.map((message, index) => {
             const isUser = message.role === "user";
             return (
-              <Box
+              <div
                 key={index}
-                display="flex"
-                alignItems="flex-start"
-                justifyContent={isUser ? "flex-end" : "flex-start"}
-                sx={{
-                  mb: 2,
-                  transition: "all 0.3s ease",
-                  "&:hover": {
-                    transform: "scale(1.02)",
-                  },
-                }}
+                className={`flex items-start mb-2 ${isUser ? 'justify-end' : 'justify-start'} transition-transform duration-300 hover:scale-105`}
               >
                 {!isUser && (
                   <Avatar
                     alt="Assistant"
                     src={``}
-                    sx={{ marginRight: 2 }}
+                    className="mr-2 w-6 h-6 text-xs"
                   />
                 )}
-                <Box
-                  component="div"
-                  bgcolor={isUser ? "grey.500" : "grey.800"}
-                  color="white"
-                  borderRadius={16}
-                  p={2}
-                  maxWidth="70%"
+                <div
+                  className={`${isUser ? 'bg-blue-500' : 'bg-gray-600'} text-white rounded-lg p-2 max-w-[75%] text-sm`}
                   dangerouslySetInnerHTML={{
                     __html: marked.parse(message.content),
                   }}
                 />
-              </Box>
+              </div>
             );
           })}
-        </Box>
+        </div>
 
-        <Box
-          sx={{
-            borderTop: 1,
-            borderColor: "divider",
-            p: 2,
-            display: "flex",
-            alignItems: "center",
-            bgcolor: "white",
-          }}
-        >
+        <div className="border-t border-gray-600 bg-gray-900 p-2 flex items-center">
           <TextField
             label="Type your message"
             fullWidth
             value={input}
             onChange={handleInputChange}
+            onKeyPress={handleKeyPress}
             variant="outlined"
-            sx={{
-              marginRight: 2,
-              bgcolor: "grey.100",
-              borderRadius: 2,
+            size="small"
+            className="mr-2 rounded text-sm"
+            InputLabelProps={{
+              style: { color: 'white' },
+            }}
+            InputProps={{
+              style: { color: 'white' },
             }}
           />
-          <IconButton color="primary" onClick={handleSubmit}>
-            <SendIcon />
+          <IconButton color="primary" onClick={() => handleSubmitWrapper()} size="small">
+            <SendIcon fontSize="small" style={{ color: 'white' }} />
           </IconButton>
-        </Box>
-      </Stack>
-    </Container>
+        </div>
+      </div>
+    </div>
   );
 }

@@ -68,11 +68,12 @@ export function Chat() {
                 {!isUser && (
                   <Avatar
                     alt="Assistant"
-                    src={``} // Fixed the avatar image path
+                    src={``}
                     sx={{ marginRight: 2 }}
                   />
                 )}
                 <Box
+                  component="div"
                   bgcolor={isUser ? "grey.500" : "grey.800"}
                   color="white"
                   borderRadius={16}

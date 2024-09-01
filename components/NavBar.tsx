@@ -30,7 +30,6 @@ const NavBar: React.FC = () => {
           </div>
           {/* Desktop Menu */}
           <div className="hidden md:flex items-center space-x-4">
-            <Link href="/" className="hover:text-gray-300 transition duration-300">Home</Link>
             {isSignedIn && (
               <Link href="/dashboard/generate" className="hover:text-gray-300 transition duration-300">Dashboard</Link>
             )}

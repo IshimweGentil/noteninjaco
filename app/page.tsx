@@ -1,4 +1,3 @@
-// pages/index.tsx or wherever your Home component is
 'use client';
 
 import './globals.css';

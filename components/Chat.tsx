@@ -21,6 +21,8 @@ export function Chat({ isVisible, setIsVisible, closeChat }: ChatProps) {
     },
   ]);
 
+  const [parsedMessages, setParsedMessages] = useState<{ [key: string]: string }>({});
+
   const { messages, input, handleInputChange, handleSubmit, setMessages } = useChat({
     api: "api/chat",
     onError: (e) => {
@@ -37,6 +39,17 @@ export function Chat({ isVisible, setIsVisible, closeChat }: ChatProps) {
   useEffect(() => {
     setMessages(persistentMessages);
   }, []);
+
+  useEffect(() => {
+    const parseMessages = async () => {
+      const parsed: { [key: string]: string } = {};
+      for (const message of persistentMessages) {
+        parsed[message.id] = await marked.parse(message.content);
+      }
+      setParsedMessages(parsed);
+    };
+    parseMessages();
+  }, [persistentMessages]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -110,7 +123,7 @@ export function Chat({ isVisible, setIsVisible, closeChat }: ChatProps) {
                 <div
                   className={`${isUser ? 'bg-blue-500' : 'bg-gray-600'} text-white rounded-lg p-2 max-w-[75%] text-sm`}
                   dangerouslySetInnerHTML={{
-                    __html: marked.parse(message.content),
+                    __html: parsedMessages[message.id] || message.content,
                   }}
                 />
               </div>

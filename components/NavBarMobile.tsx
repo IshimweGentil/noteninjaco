@@ -2,7 +2,7 @@
 
 import React, { ReactNode, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
-import { SignInButton, SignUpButton, UserButton, useUser,  } from "@clerk/nextjs";
+import { SignInButton, SignUpButton, UserButton, useUser } from "@clerk/nextjs";
 import { motion, useCycle } from 'framer-motion';
 import { usePathname } from 'next/navigation';
 import { Icon } from '@iconify/react';
@@ -43,12 +43,10 @@ const NavBarMobile = () => {
   const [isOpen, toggleOpen] = useCycle(false, true);
   const { isSignedIn } = useUser();
 
-  
-
   return (
     <div className={`relative ${isOpen ? 'overflow-hidden' : ''}`}>
       {isOpen && (
-        <div className="fixed inset-0  backdrop-blur-md z-40" />
+        <div className="fixed inset-0 backdrop-blur-md z-40" />
       )}
 
       <motion.nav
@@ -59,62 +57,64 @@ const NavBarMobile = () => {
         ref={containerRef}
       >
         <motion.div
-          className="absolute inset-0 w-full"
+          className="absolute inset-0 w-full bg-purple-600"
           variants={sidebar}
         />
 
         <motion.ul
-          className="absolute inset-0 flex flex-col items-center justify-center w-full"
+          className="absolute inset-0 flex flex-col items-center justify-center w-full p-4"
           variants={variants}
         >
-          <MenuItem>
-            <Link href="/" onClick={() => toggleOpen()} className="flex w-full text-2xl">
-              Home
-            </Link>
-          </MenuItem>
+          <div className="w-full max-w-sm flex flex-col items-center space-y-4">
+            <MenuItem isLast={false}>
+              <Link href="/" onClick={() => toggleOpen()} className="flex justify-center w-full text-2xl text-white">
+                Home
+              </Link>
+            </MenuItem>
 
-          {isSignedIn && (
-            <>
-              <MenuItem className="my-3 h-px w-full bg-gray-700" />
+            {isSignedIn && (
+              <>
+                <MenuItem isLast={false}>
+                  <Link href="/dashboard/generate" onClick={() => toggleOpen()} className="flex justify-center w-full text-2xl text-white">
+                    Generate
+                  </Link>
+                </MenuItem>
 
-              <MenuItem>
-                <Link href="/dashboard/generate" onClick={() => toggleOpen()} className="flex w-full text-2xl">
-                  Generate
-                </Link>
-              </MenuItem>
+                <MenuItem isLast={false}>
+                  <Link href="/dashboard/study" onClick={() => toggleOpen()} className="flex justify-center w-full text-2xl text-white">
+                    Study
+                  </Link>
+                </MenuItem>
 
-              <MenuItem>
-                <Link href="/dashboard/study" onClick={() => toggleOpen()} className="flex w-full text-2xl">
-                  Study
-                </Link>
-              </MenuItem>
+                <MenuItem isLast={true}>
+                  <div className="flex justify-center w-full">
+                    <UserButton
+                      afterSignOutUrl="/"
+                    />
+                  </div>
+                </MenuItem>
+              </>
+            )}
 
-              <MenuItem className="mt-3">
-                <UserButton
-                  afterSignOutUrl="/"
-                />
-              </MenuItem>
-            </>
-          )}
-
-          {!isSignedIn && (
-            <>
-              <MenuItem >
-                <SignInButton  mode="modal">
-                  <button className="w-full text-left bg-purple-600 text-white px-4 py-2 my-4 rounded hover:bg-purple-700 transition duration-300">
-                    Sign In
-                  </button>
-                </SignInButton>
-              </MenuItem>
-              <MenuItem>
-                <SignUpButton mode="modal">
-                  <button className="w-full text-left bg-white border text-purple-600 px-4 py-2 rounded hover:bg-purple-600 hover:text-white transition duration-300">
-                    Sign Up
-                  </button>
-                </SignUpButton>
-              </MenuItem>
-            </>
-          )}
+            {!isSignedIn && (
+              <>
+                <MenuItem isLast={false}>
+                  <SignInButton mode="modal">
+                    <button className="w-full text-center bg-white text-purple-600 px-4 py-2 rounded hover:bg-purple-100 transition duration-300">
+                      Sign In
+                    </button>
+                  </SignInButton>
+                </MenuItem>
+                <MenuItem isLast={true}>
+                  <SignUpButton mode="modal">
+                    <button className="w-full text-center bg-white border border-white text-purple-600 px-4 py-2 rounded hover:bg-purple-100 transition duration-300">
+                      Sign Up
+                    </button>
+                  </SignUpButton>
+                </MenuItem>
+              </>
+            )}
+          </div>
         </motion.ul>
 
         <MenuToggle toggle={toggleOpen} />
@@ -123,26 +123,24 @@ const NavBarMobile = () => {
   );
 };
 
-export default NavBarMobile;
-
 const MenuToggle = ({ toggle }: { toggle: any }) => (
   <button onClick={toggle} className="pointer-events-auto absolute right-4 top-[14px] z-30">
-  <svg width="23" height="23" viewBox="0 0 23 23">
-    <Path 
-      variants={{ closed: { d: "M 2 2.5 L 20 2.5" }, open: { d: "M 3 16.5 L 17 2.5" } }} 
-      stroke="white"  // Set stroke to white
-    />
-    <Path 
-      d="M 2 9.423 L 20 9.423" 
-      variants={{ closed: { opacity: 1 }, open: { opacity: 0 } }} 
-      stroke="white"  // Set stroke to white
-    />
-    <Path 
-      variants={{ closed: { d: "M 2 16.346 L 20 16.346" }, open: { d: "M 3 2.5 L 17 16.346" } }} 
-      stroke="white"  // Set stroke to white
-    />
-  </svg>
-</button>
+    <svg width="23" height="23" viewBox="0 0 23 23">
+      <Path
+        variants={{ closed: { d: "M 2 2.5 L 20 2.5" }, open: { d: "M 3 16.5 L 17 2.5" } }}
+        stroke="white"
+      />
+      <Path
+        d="M 2 9.423 L 20 9.423"
+        variants={{ closed: { opacity: 1 }, open: { opacity: 0 } }}
+        stroke="white"
+      />
+      <Path
+        variants={{ closed: { d: "M 2 16.346 L 20 16.346" }, open: { d: "M 3 2.5 L 17 16.346" } }}
+        stroke="white"
+      />
+    </svg>
+  </button>
 );
 
 const Path = (props: any) => (
@@ -171,15 +169,17 @@ const MenuItemVariants = {
 const MenuItem = ({
   className,
   children,
+  isLast,
 }: {
   className?: string;
   children?: ReactNode;
+  isLast: boolean;
 }) => {
   return (
-    <motion.li variants={MenuItemVariants} className={className}>
+    <motion.li variants={MenuItemVariants} className={`w-full ${className}`}>
       {children}
+      {!isLast && <div className="mt-4 w-16 h-px bg-white/60 mx-auto"></div>}
     </motion.li>
-    
   );
 };
 
@@ -192,9 +192,9 @@ const MenuItemWithSubMenu: React.FC<MenuItemWithSubMenuProps> = ({
 
   return (
     <>
-      <MenuItem>
+      <MenuItem isLast={false}>
         <button
-          className="flex w-full text-2xl"
+          className="flex justify-center w-full text-2xl text-white"
           onClick={() => setSubMenuOpen(!subMenuOpen)}
         >
           <div className="flex flex-row justify-between w-full items-center">
@@ -211,11 +211,11 @@ const MenuItemWithSubMenu: React.FC<MenuItemWithSubMenuProps> = ({
 
       <div className={`mt-2 ml-2 flex flex-col space-y-2 ${subMenuOpen ? 'block' : 'hidden'}`}>
         {item.subMenuItems?.map((subitem, subIdx) => (
-          <MenuItem key={subIdx}>
+          <MenuItem key={subIdx} isLast={subIdx === item.subMenuItems!.length - 1}>
             <Link
               href={subitem.path}
               onClick={() => toggleOpen()}
-              className={`${subitem.path === pathname ? 'font-bold' : ''}`}
+              className={`flex justify-center w-full ${subitem.path === pathname ? 'font-bold' : ''} text-white`}
             >
               {subitem.title}
             </Link>
@@ -239,3 +239,4 @@ const useDimensions = (ref: any) => {
   return dimensions.current;
 };
 
+export default NavBarMobile;

@@ -2,7 +2,7 @@
 
 import React, { ReactNode, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
-import { SignInButton, SignUpButton, UserButton, useUser,  } from "@clerk/nextjs";
+import { SignInButton, SignUpButton, UserButton, useUser } from "@clerk/nextjs";
 import { motion, useCycle } from 'framer-motion';
 import { usePathname } from 'next/navigation';
 import { Icon } from '@iconify/react';

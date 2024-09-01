@@ -1,6 +1,6 @@
 "use client";
 
-import { useChat } from 'ai/react';
+import { useChat, Message } from 'ai/react';
 import { marked } from "marked";
 import { useState, useEffect, useRef, KeyboardEvent } from "react";
 import { TextField, IconButton, Avatar } from "@mui/material";
@@ -13,7 +13,7 @@ interface ChatProps {
 }
 
 export function Chat({ isVisible, setIsVisible, closeChat }: ChatProps) {
-  const [persistentMessages, setPersistentMessages] = useState([
+  const [persistentMessages, setPersistentMessages] = useState<Message[]>([
     {
       id: "1",
       role: "assistant",
@@ -66,7 +66,10 @@ export function Chat({ isVisible, setIsVisible, closeChat }: ChatProps) {
   const handleSubmitWrapper = (e?: React.FormEvent<HTMLFormElement>) => {
     if (e) e.preventDefault();
     handleSubmit(e as React.FormEvent<HTMLFormElement>);
-    setPersistentMessages(prevMessages => [...prevMessages, { id: String(Date.now()), role: "user", content: input }]);
+    setPersistentMessages(prevMessages => [
+      ...prevMessages, 
+      { id: String(Date.now()), role: "user", content: input } as Message
+    ]);
   };
 
   const handleKeyPress = (e: KeyboardEvent<HTMLDivElement>) => {

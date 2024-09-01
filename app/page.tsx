@@ -1,13 +1,26 @@
-import React from 'react'
-import Hero from '../components/Hero'
-import Features from '../components/Features'
-import Pricing from '../components/Pricing'
-import Button from '@mui/material'
-import { Box } from 'lucide-react'
-import Link from 'next/link'
+// pages/index.tsx or wherever your Home component is
+'use client';
 
+import './globals.css';
+import React, { useState, useCallback } from 'react';
+import Hero from '../components/Hero';
+import Features from '../components/Features';
+import Pricing from '../components/Pricing';
+import Footer from '../components/Footer';
+import ChatButton from '../components/ChatButton';
+import { Chat } from '../components/Chat';
 
 const Home: React.FC = () => {
+  const [isVisible, setIsVisible] = useState(false);
+
+  const toggleVisibility = useCallback(() => {
+    setIsVisible(prevState => !prevState);
+  }, []);
+
+  const closeChat = useCallback(() => {
+    setIsVisible(false);
+  }, []);
+
   return (
     <>
       <main className="relative flex justify-center items-center flex-col mx-auto sm:px-10 px-5">
@@ -15,11 +28,14 @@ const Home: React.FC = () => {
           <Hero />
           <Features />
           <Pricing />
-
         </div>
       </main>
+      <Footer />
+      <ChatButton onClick={toggleVisibility} isVisible={isVisible} />
+      {isVisible && <Chat isVisible={isVisible} setIsVisible={setIsVisible} closeChat={closeChat} />}
     </>
-  )
-}
+  );
+};
 
-export default Home
+export default Home;
+

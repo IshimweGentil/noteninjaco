@@ -37,7 +37,7 @@ const formatMessage = (message: VercelChatMessage): string => {
     return `${message.role}: ${message.content}`;
 };
 
-const TEMPLATE: string = `You are the AI customer support bot for the NoteNinja website. Answer the user's questions based on the following context:
+const TEMPLATE: string = `You are Sarah, the AI customer support bot for the NoteNinja website. Answer the user's questions based on the following context:
 ==============================
 Context: {context}
 ==============================

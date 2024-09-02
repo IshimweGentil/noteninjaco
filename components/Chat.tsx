@@ -1,15 +1,29 @@
 "use client";
 
-import { useChat, Message } from 'ai/react';
+import {
+  Box,
+  TextField,
+  Avatar,
+  Stack,
+  IconButton,
+  Container,
+} from "@mui/material";
+import { useChat, Message as ChatMessage } from 'ai/react';
 import { marked } from "marked";
 import { useState, useEffect, useRef, KeyboardEvent } from "react";
-import { TextField, IconButton, Avatar } from "@mui/material";
 import SendIcon from "@mui/icons-material/Send";
 
 interface ChatProps {
   isVisible: boolean;
   setIsVisible: (isVisible: boolean) => void;
   closeChat: () => void;
+}
+
+// Define the Message type to match the expected structure
+interface Message {
+  id: string;
+  role: "function" | "assistant" | "system" | "user" | "data" | "tool"; // Adjusted role type
+  content: string;
 }
 
 export function Chat({ isVisible, setIsVisible, closeChat }: ChatProps) {
@@ -38,7 +52,7 @@ export function Chat({ isVisible, setIsVisible, closeChat }: ChatProps) {
 
   useEffect(() => {
     setMessages(persistentMessages);
-  }, []);
+  }, [persistentMessages]); // Added dependency to ensure updates
 
   useEffect(() => {
     const parseMessages = async () => {

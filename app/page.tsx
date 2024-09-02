@@ -5,7 +5,6 @@ import React, { useState, useCallback } from 'react';
 import Hero from '../components/Hero';
 import Features from '../components/Features';
 import Pricing from '../components/Pricing';
-import Footer from '../components/Footer';
 import ChatButton from '../components/ChatButton';
 import { Chat } from '../components/Chat';
 
@@ -29,7 +28,6 @@ const Home: React.FC = () => {
           <Pricing />
         </div>
       </main>
-      <Footer />
       <ChatButton onClick={toggleVisibility} isVisible={isVisible} />
       {isVisible && <Chat isVisible={isVisible} setIsVisible={setIsVisible} closeChat={closeChat} />}
     </>

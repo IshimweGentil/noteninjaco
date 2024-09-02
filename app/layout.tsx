@@ -12,14 +12,13 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang="en">
-        <body className="bg-gray-900 text-white min-h-screen flex flex-col overflow-x-hidden">
-          <div className="flex flex-col">
-            <main className="flex-1 overflow-auto">
-              <NavBar />
-              <NavBarMobile />
-              {children}
-              <Footer />
-            </main>
+        <body className="bg-slate-950 text-white min-h-screen flex flex-col">
+          <div className="flex">
+            <main className="flex-1">
+            <NavBar />
+            <NavBarMobile />
+            {children}
+          </main>
           </div>
         </body>
       </html>

@@ -1,5 +1,7 @@
 import React from "react";
-import { Spotlight } from "@/components/ui/Spotlight";
+import { FaLocationArrow } from "react-icons/fa6";
+import MagicButton from "./ui/MagicButton";
+import { TextGenerateEffect } from "./ui/TextGenerationEffect";
 import Link from "next/link";
 import {
   SignedIn,
@@ -9,43 +11,55 @@ import {
 
 const Hero = () => {
   return (
-    <div className="relative overflow-hidden">
-      {/* Spotlight containers */}
-      <div className="absolute inset-0">
-        <Spotlight
-          className="-top-40 -left-10 md:left-32 md:-top-20 h-screen"
-          fill="white"
-        />
-        <Spotlight
-          className="-top-10 -left-full h-[80vh] w-[50vw]"
-          fill="purple"
-        />
-        <Spotlight className="-top-28 -left-80 h-[80vh] w-[50vw]" fill="blue" />
+    <div className="relative h-[40rem] w-full overflow-hidden">
+      {/* Custom grid background with fading effect */}
+      <div className="absolute inset-0 h-full w-full">
+        <div
+          className="h-full w-full bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"
+          style={{
+            maskImage: 'radial-gradient(ellipse at center, black 10%, transparent 70%)',
+            WebkitMaskImage: 'radial-gradient(ellipse at center, black 10%, transparent 70%)'
+          }}
+        ></div>
       </div>
-
+      
       {/* Hero content */}
-      <div className="relative z-10 pb-20 pt-36 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto text-center">
-        <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-white mb-6">
-          Transform Your Notes into Powerful Flashcards
-        </h1>
-        <p className="text-xl md:text-2xl text-gray-300 mb-8 max-w-3xl mx-auto">
-          NoteNinja helps you streamline your study process, turning your notes
-          into effective flashcards for quick and efficient review.
-        </p>
-        <SignedIn>
-          <Link href={`/dashboard/generate`}>
-            <button className="bg-purple-600 text-white px-8 py-3 rounded-full text-lg font-semibold hover:bg-purple-700 transition duration-300">
-              Get Started
-            </button>
-          </Link>
-        </SignedIn>
-        <SignedOut>
-          <SignInButton mode="modal">
-            <button className="bg-purple-600 text-white px-8 py-3 rounded-full text-lg font-semibold hover:bg-purple-700 transition duration-300">
-              Get Started
-            </button>
-          </SignInButton>
-        </SignedOut>
+      <div className="relative z-10 flex h-full items-center justify-center">
+        <div className="max-w-[89vw] md:max-w-2xl lg:max-w-[60vw] flex flex-col items-center justify-center">
+          <p className="uppercase tracking-widest text-s text-center text-blue-100 max-w-90">
+            Transform Your Documents into Studyable material
+          </p>
+          <TextGenerateEffect
+            words="Streamline Your Study Process"
+            className="text-center text-[40px] md:text-5xl lg:text-6xl text-white"
+          />
+          <p className="pb-10 tracking-widest text-xs text-center text-blue-100 max-w-80">
+            Designed and developed by 
+            Ishimwe Gentil, 
+            Josh Temidayo,
+            Mounir Mkhallati,
+            and Kyle Huang.
+          </p>
+          
+          <SignedIn>
+            <Link href={`/dashboard/generate`}>
+              <MagicButton
+                title="Get Started"
+                icon={<FaLocationArrow />}
+                position="right"
+              />
+            </Link>
+          </SignedIn>
+          <SignedOut>
+            <SignInButton mode="modal">
+              <MagicButton
+                title="Get Started"
+                icon={<FaLocationArrow />}
+                position="right"
+              />
+            </SignInButton>
+          </SignedOut>
+        </div>
       </div>
     </div>
   );

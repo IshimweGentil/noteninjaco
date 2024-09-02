@@ -11,10 +11,11 @@ import { Icon } from '@iconify/react';
 
 const Sidebar = () => {
   return (
-    <div className="md:w-60 bg-gray-900 h-screen flex-1 fixed border-r border-gray-800 hidden md:flex">
+    <div 
+    className="md:w-60 h-screen flex-1 fixed border-r border-slate-700 hidden md:flex"
+    style={{backgroundColor:'rgb(9, 16, 33)'}} >
       <div className="flex flex-col space-y-6 w-full">
         
-
         <div className="flex flex-col space-y-2  pt-6 md:px-6 ">
           {SIDENAV_ITEMS.map((item, idx) => {
             return <MenuItem key={idx} item={item} />;

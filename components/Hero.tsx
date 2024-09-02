@@ -6,8 +6,8 @@ import Link from "next/link";
 import {
   SignedIn,
   SignedOut,
-  SignInButton
 } from "@clerk/nextjs";
+import GetStarted from "./ui/GetStarted";
 
 const Hero = () => {
   return (
@@ -17,8 +17,8 @@ const Hero = () => {
         <div
           className="h-full w-full bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"
           style={{
-            maskImage: 'radial-gradient(ellipse at center, black 10%, transparent 70%)',
-            WebkitMaskImage: 'radial-gradient(ellipse at center, black 10%, transparent 70%)'
+            maskImage: 'radial-gradient(ellipse at center, black 10%, transparent 80%)',
+            WebkitMaskImage: 'radial-gradient(ellipse at center, black 20%, transparent 70%)'
           }}
         ></div>
       </div>
@@ -51,13 +51,7 @@ const Hero = () => {
             </Link>
           </SignedIn>
           <SignedOut>
-            <SignInButton mode="modal">
-              <MagicButton
-                title="Get Started"
-                icon={<FaLocationArrow />}
-                position="right"
-              />
-            </SignInButton>
+            <GetStarted />
           </SignedOut>
         </div>
       </div>

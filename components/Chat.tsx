@@ -1,17 +1,14 @@
 "use client";
 
 import {
-  Box,
   TextField,
-  Avatar,
-  Stack,
   IconButton,
-  Container,
 } from "@mui/material";
 import { useChat, Message as ChatMessage } from 'ai/react';
 import { marked } from "marked";
 import { useState, useEffect, useRef, KeyboardEvent } from "react";
 import SendIcon from "@mui/icons-material/Send";
+import { Icon } from '@iconify/react';
 
 interface ChatProps {
   isVisible: boolean;
@@ -19,10 +16,9 @@ interface ChatProps {
   closeChat: () => void;
 }
 
-// Define the Message type to match the expected structure
 interface Message {
   id: string;
-  role: "function" | "assistant" | "system" | "user" | "data" | "tool"; // Adjusted role type
+  role: "function" | "assistant" | "system" | "user" | "data" | "tool";
   content: string;
 }
 
@@ -52,7 +48,7 @@ export function Chat({ isVisible, setIsVisible, closeChat }: ChatProps) {
 
   useEffect(() => {
     setMessages(persistentMessages);
-  }, [persistentMessages]); // Added dependency to ensure updates
+  }, [persistentMessages, setMessages]);
 
   useEffect(() => {
     const parseMessages = async () => {
@@ -109,7 +105,7 @@ export function Chat({ isVisible, setIsVisible, closeChat }: ChatProps) {
   return (
     <div
       ref={chatRef}
-      className={`fixed bottom-0 right-0 mb-4 mr-4 w-11/12 sm:w-3/4 md:w-2/3 lg:w-1/2 xl:w-1/3 max-w-md bg-gray-600/30 border border-gray-900 backdrop-blur-md rounded-lg shadow-lg overflow-hidden z-50 transition-all duration-500 ease-in-out ${
+      className={`fixed bottom-0 right-0 mb-4 mr-4 w-11/12 sm:w-3/4 md:w-2/3 lg:w-1/2 xl:w-1/3 max-w-md bg-slate-800/30 border border-slate-600 backdrop-blur-md rounded-lg shadow-lg overflow-hidden z-50 transition-all duration-500 ease-in-out ${
         isVisible
           ? 'opacity-100 translate-y-0'
           : 'opacity-0 translate-y-full pointer-events-none'
@@ -128,14 +124,12 @@ export function Chat({ isVisible, setIsVisible, closeChat }: ChatProps) {
                 className={`flex items-start mb-2 ${isUser ? 'justify-end' : 'justify-start'} transition-transform duration-300 hover:scale-105`}
               >
                 {!isUser && (
-                  <Avatar
-                    alt="Assistant"
-                    src={``}
-                    className="mr-2 w-6 h-6 text-xs"
-                  />
+                  <div className="mr-2 w-6 h-6 flex items-center justify-center ">
+                    <Icon icon="mingcute:ai-fill" width="24" height="24" className="text-blue-100" />
+                  </div>
                 )}
                 <div
-                  className={`${isUser ? 'bg-blue-500' : 'bg-gray-600'} text-white rounded-lg p-2 max-w-[75%] text-sm`}
+                  className={`${isUser ? 'bg-slate-600' : 'bg-slate-700'} text-white rounded-lg p-2 max-w-[75%] text-sm`}
                   dangerouslySetInnerHTML={{
                     __html: parsedMessages[message.id] || message.content,
                   }}
@@ -145,7 +139,7 @@ export function Chat({ isVisible, setIsVisible, closeChat }: ChatProps) {
           })}
         </div>
 
-        <div className="border-t border-gray-600 bg-gray-900 p-2 flex items-center">
+        <div className="border-t border-gray-600 bg-slate-900 p-2 flex items-center">
           <TextField
             label="Type your message"
             fullWidth
@@ -156,10 +150,10 @@ export function Chat({ isVisible, setIsVisible, closeChat }: ChatProps) {
             size="small"
             className="mr-2 rounded text-sm"
             InputLabelProps={{
-              style: { color: 'white' },
+              style: { color: '#dbeafe' },
             }}
             InputProps={{
-              style: { color: 'white' },
+              style: { color: '#dbeafe' },
             }}
           />
           <IconButton color="primary" onClick={() => handleSubmitWrapper()} size="small">

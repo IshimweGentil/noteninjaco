@@ -5,13 +5,14 @@ import { useUser } from '@clerk/nextjs';
 import Tabs from '@/components/Tabs';
 import FileTab from '@/components/FileTab';
 import TextTab from '@/components/TextTab';
+import LoadingSpinner from '@/components/ui/LoadingSpinner';
 
 const GeneratePage = () => {
   const { isLoaded, isSignedIn, user } = useUser();
   const [activeTab, setActiveTab] = useState('file');
 
   if (!isLoaded || !isSignedIn) {
-    return <div>Loading...</div>;
+    return <LoadingSpinner />;
   }
 
   const tabs = [

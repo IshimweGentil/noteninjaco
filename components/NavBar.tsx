@@ -18,8 +18,8 @@ const NavBar: React.FC = () => {
       className={cn(
         "sticky inset-x-0 top-0 z-30 w-full transition-all text-white",
         {
-          "border-b border-gray-800 bg-gray-900/75 backdrop-blur-lg": scrolled,
-          "border-b border-gray-800": isDashboardRoute,
+          "border-b border-blue-800 border-slate-900/75 backdrop-blur-lg": scrolled,
+          "border-b border-slate-700": isDashboardRoute,
         }
       )}
     >
@@ -50,11 +50,9 @@ const NavBar: React.FC = () => {
               <UserButton afterSignOutUrl="/" />
             )}
           </div>
-          {/* Removed Mobile Menu Toggle Button */}
         </div>
       </div>
 
-      {/* Removed Mobile Menu */}
     </nav>
   );
 }

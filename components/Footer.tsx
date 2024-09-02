@@ -1,9 +1,9 @@
 import React from 'react'
 
 const Footer: React.FC = () => (
-  <footer className=" text-gray-300 py-8">
+  <footer className="text-gray-300 py-8">
     <div className="container mx-auto px-4 text-center">
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8 max-w-3xl mx-auto">
         <div>
           <h3 className="text-lg font-semibold mb-2">NoteNinja.co</h3>
           <p>Transforming your study process</p>
@@ -21,12 +21,6 @@ const Footer: React.FC = () => (
           <h3 className="text-lg font-semibold mb-2">Contact</h3>
           <p>Email: info@noteninja.co</p>
           <p>Phone: (123) 456-7890</p>
-        </div>
-        <div>
-          <h3 className="text-lg font-semibold mb-2">Follow Us</h3>
-          <div className="flex justify-center space-x-4">
-            {/* Add social media icons here */}
-          </div>
         </div>
       </div>
       <div>

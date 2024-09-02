@@ -3,12 +3,13 @@
 import React from 'react';
 import { useUser } from '@clerk/nextjs';
 import StudyContent from '@/components/StudyContent';
+import LoadingSpinner from '@/components/ui/LoadingSpinner';
 
 const StudyPage = () => {
   const { isLoaded, isSignedIn, user } = useUser();
 
   if (!isLoaded || !isSignedIn) {
-    return <div>Loading...</div>;
+    return <LoadingSpinner />;
   }
 
   return (

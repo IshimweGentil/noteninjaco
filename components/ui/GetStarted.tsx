@@ -60,7 +60,7 @@ const GetStarted: React.FC = () => {
                 <FaTimes size={20} />
               </button>
               <p className="uppercase text-sm sm:text-base text-blue-100 mb-2 sm:mb-4 text-center">
-                Let's get you in
+                Let&apos;s get you in
               </p>
               <CompactPricing />
             </motion.div>

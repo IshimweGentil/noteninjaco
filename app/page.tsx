@@ -7,6 +7,7 @@ import Features from '../components/Features';
 import Pricing from '../components/Pricing';
 import ChatButton from '../components/ChatButton';
 import { Chat } from '../components/Chat';
+import Footer from '../components/Footer';
 
 const Home: React.FC = () => {
   const [isVisible, setIsVisible] = useState(false);
@@ -26,6 +27,7 @@ const Home: React.FC = () => {
           <Hero />
           <Features />
           <Pricing />
+          <Footer />
         </div>
       </main>
       <ChatButton onClick={toggleVisibility} isVisible={isVisible} />

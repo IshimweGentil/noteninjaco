@@ -20,7 +20,6 @@ const Footer: React.FC = () => (
         <div>
           <h3 className="text-lg font-semibold mb-2">Contact</h3>
           <p>Email: info@noteninja.co</p>
-          <p>Phone: (123) 456-7890</p>
         </div>
       </div>
       <div>

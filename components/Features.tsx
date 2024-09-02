@@ -11,26 +11,26 @@ import {
 const Features = () => {
   const featureItems = [
     {
-      title: "Convert notes to flashcards",
-      description: "Transform your notes into interactive flashcards for efficient studying.",
+      title: "Convert Your Notes Effortlessly",
+      description: "Upload your documents, PowerPoints, or lecture notes, and let NoteNinja do the rest. We’ll break down your content into easily digestible formats tailored for effective study sessions.",
       icon: <IconNotes className="h-4 w-4 text-blue-100" />,
       className: "md:col-span-2",
     },
     {
-      title: "Efficient review system",
-      description: "Optimize your learning with our spaced repetition review system.",
+      title: "Study Anywhere, Anytime",
+      description: "Your study tools are always at your fingertips. Access your personalized flashcards and summaries from any device, and make the most of your study time no matter where you are.",
       icon: <IconClockHour4 className="h-4 w-4 text-blue-100" />,
       className: "md:col-span-1",
     },
     {
-      title: "Organize study material",
-      description: "Keep your study materials structured and easily accessible.",
+      title: "Smart Flashcard Generator",
+      description: "Create flashcards automatically from your notes, documents, or transcribed audio. Our AI identifies essential information and formats it into flashcards, making it easier to memorize crucial details.",
       icon: <IconFolders className="h-4 w-4 text-blue-100" />,
       className: "md:col-span-1",
     },
     {
-      title: "AI-powered learning insights",
-      description: "Gain valuable insights into your study habits and progress with our AI analysis.",
+      title: "Voice-to-Notes Transcription",
+      description: "No time to jot down notes during lectures? Use our voice transcriber to capture everything. Simply record your lectures or discussions, and NoteNinja will convert them into neatly organized notes, ready for review.",
       icon: <IconBrain className="h-4 w-4 text-blue-100" />,
       className: "md:col-span-2",
     },

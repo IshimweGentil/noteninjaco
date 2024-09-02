@@ -101,14 +101,14 @@ const NavBarMobile = () => {
             <>
               <MenuItem >
                 <SignInButton  mode="modal">
-                  <button className="w-full text-left bg-purple-600 text-white px-4 py-2 my-4 rounded hover:bg-purple-700 transition duration-300">
+                  <button className="w-full text-left bg-slate-700 text-white px-4 py-2 my-4 rounded hover:bg-slate-800 transition duration-300">
                     Sign In
                   </button>
                 </SignInButton>
               </MenuItem>
               <MenuItem>
                 <SignUpButton mode="modal">
-                  <button className="w-full text-left bg-white border text-purple-600 px-4 py-2 rounded hover:bg-purple-600 hover:text-white transition duration-300">
+                  <button className="w-full text-left bg-white border text-slate-700 px-4 py-2 rounded hover:bg-slate-800 hover:text-white transition duration-300">
                     Sign Up
                   </button>
                 </SignUpButton>

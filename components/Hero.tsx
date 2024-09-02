@@ -30,7 +30,7 @@ const Hero = () => {
             Transform Your Documents into Studyable material
           </p>
           <TextGenerateEffect
-            words="Streamline Your Study Process"
+            words="Streamline Your Studying Process"
             className="text-center text-[40px] md:text-5xl lg:text-6xl text-white"
           />
           <p className="pb-10 tracking-widest text-xs text-center text-blue-100 max-w-80">

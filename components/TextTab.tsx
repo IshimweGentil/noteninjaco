@@ -19,7 +19,7 @@ const TextTab = () => {
           title="Generate"
           icon={<ArrowRight size={16} />}
           position="right"
-          handleClick={handleGenerate}
+          onClick={handleGenerate}
         />
       </div>
     </div>

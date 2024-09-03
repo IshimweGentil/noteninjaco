@@ -4,23 +4,33 @@ export const filterFiles = (files: File[], fileExtensionName: string): File[] =>
 }
 
 // Read and parse a file
-export const parsePDFs = async (files: File[]): Promise<string> => {
+export const parsePDFs = async (files: File[]): Promise<string[]> => {
   const formData = new FormData();
   files.forEach((file, index) => {
     formData.append(`file-${index}`, file);
   });
 
-  const response = await fetch('/api/pdf-parser', {
-    method: 'POST',
-    body: formData,
-  });
+  try {
+    const response = await fetch('/api/pdf-parser', {
+      method: 'POST',
+      body: formData,
+    });
 
-  if (!response.ok) {
-    throw new Error('Failed to upload files');
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Failed to upload files: ${response.status} ${response.statusText}. Server response: ${errorText}`);
+    }
+
+    const result = await response.json();
+    console.log('Server response:', result);
+
+    if (!result.texts) {
+      throw new Error('Unexpected server response format');
+    }
+
+    return result.texts;
+  } catch (error) {
+    console.error('Error in parsePDFs:', error);
+    throw error;
   }
-
-  const result = await response.json();
-  const data = result.texts;
-  console.log(data);
-  return data;
 }

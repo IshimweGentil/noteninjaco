@@ -10,7 +10,6 @@ export const config = {
 export async function POST(req: Request) {
   console.log("REQUEST RECEIVED!");
 
-  // convert ReadableStream to Buffer
   const streamToBuffer = async (stream: ReadableStream<Uint8Array>) => {
     const reader = stream.getReader();
     const chunks: Uint8Array[] = [];
@@ -23,18 +22,44 @@ export async function POST(req: Request) {
     return Buffer.concat(chunks);
   };
 
-  // extract form data
-  const formData = await req.formData();
-  let text = '';
+  try {
+    const formData = await req.formData();
+    console.log("Form data received, number of entries:", formData.entries().length);
 
-  formData.forEach(async (value, key) => {
-    if (value instanceof File) {
-      const buffer = await streamToBuffer(value.stream());
-      const data = await pdfParse(buffer);
-      text += data.text + '\n';
-    }
-  });
+    const filePromises: any[] = [];
 
-  const result = text.trim().split('\n');
-  return NextResponse.json({ texts: result });
+    formData.forEach((value, key) => {
+      if (value instanceof File) {
+        console.log(`Processing file: ${value.name}`);
+        const promise = (async () => {
+          try {
+            const buffer = await streamToBuffer(value.stream());
+            console.log(`Buffer created for ${value.name}, size: ${buffer.length} bytes`);
+            
+            const data = await pdfParse(buffer, {
+              max: 0, // Remove any page limitation
+            });
+            
+            console.log(`PDF parsed for ${value.name}, text length: ${data.text.length}`);
+            return data.text.trim(); // Trim any leading/trailing whitespace
+          } catch (error) {
+            console.error(`Error processing file ${value.name}:`, error);
+            return '';
+          }
+        })();
+        filePromises.push(promise);
+      }
+    })
+
+    const texts = await Promise.all(filePromises);
+    console.log(`Number of processed texts: ${texts.length}`);
+
+    const result = texts.filter(text => text.length > 0).join('\n');
+    console.log(`Number of non-empty texts: ${result.length}`);
+
+    return NextResponse.json({ texts: result });
+  } catch (error) {
+    console.error("Error in POST handler:", error);
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+  }
 }

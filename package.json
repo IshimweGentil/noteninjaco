@@ -27,6 +27,7 @@
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "dompurify": "^3.1.6",
+    "firebase": "^10.13.1",
     "framer-motion": "^11.3.31",
     "fs": "^0.0.1-security",
     "langchain": "^0.2.17",

@@ -17,7 +17,7 @@ const GeneratePage = () => {
 
   const tabs = [
     { id: 'file', label: 'Files' },
-    { id: 'text', label: 'Text' }
+    { id: 'text', label: 'Text' },
   ];
 
   return (
@@ -32,9 +32,10 @@ const GeneratePage = () => {
         </div>
       </div>
       <div className="flex-grow container mx-auto px-4 py-6">
-        <h1 className=" mb-2">Welcome, {user.firstName || 'User'}!</h1>
+        <h1 className="mb-2">Welcome, {user.firstName || 'User'}!</h1>
         <div className="mt-2">
-          {activeTab === 'file' ? <FileTab /> : <TextTab />}
+          {activeTab === 'file' && <FileTab />}
+          {activeTab === 'text' && <TextTab />}
         </div>
       </div>
     </div>

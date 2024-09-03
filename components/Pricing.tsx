@@ -90,7 +90,7 @@ const Pricing: React.FC = () => {
         price="$2.99/month"
         features={['Unlimited note conversion', 'Advanced flashcard features', 'Priority support']}
         productLink="https://buy.stripe.com/5kA5nd4VYcu993idQQ"
-        onChoosePlan={() => handleCheckout('prod_QlvJm8Za7PS3nM')} // Replace with the actual price ID for the Free plan
+        onChoosePlan={() => handleCheckout('prod_QlvJm8Za7PS3nM')}
       />
     </div>
   </section>

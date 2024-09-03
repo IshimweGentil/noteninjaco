@@ -11,13 +11,11 @@ interface PricingCardProps {
   features: string[];
   productLink?: string;
   onChoosePlan?: () => void; // Function to handle the checkout process
-  // isProPlan?: boolean; // Optional flag to determine if it's a Pro plan
 }
 
 const PricingCard: React.FC<PricingCardProps> = ({ title, price, features, productLink ,onChoosePlan }) => {
   const handleButtonClick = () => {
     if (productLink) {
-      // console.log(`Redirecting to product link: ${productLink}`);
       window.location.href = productLink;
     } else if (onChoosePlan) {
       onChoosePlan();

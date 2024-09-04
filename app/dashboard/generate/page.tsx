@@ -28,6 +28,7 @@ import {
 } from "@mui/material";
 import { writeBatch, doc, getDoc, collection } from "firebase/firestore";
 import { IconMessages } from "@tabler/icons-react";
+import Transcribe from "@/components/Transcribe"
 
 const GeneratePage = () => {
   const { isLoaded, isSignedIn, user } = useUser();
@@ -142,6 +143,11 @@ const GeneratePage = () => {
               control={<Radio />}
               label="Upload PDF"
             />
+            <FormControlLabel
+              value="transcribe"
+              control={<Radio />}
+              label="Record Audio"
+            />
           </RadioGroup>
 
           {inputMethod === "text" ? (
@@ -155,10 +161,12 @@ const GeneratePage = () => {
               variant="outlined"
               sx={{ mb: 2 }}
             />
-          ) : (
+          ) : inputMethod === "pdf" ? (
             // <Suspense fallback="Loading...">
               <FileUploadArea setText={setText} /> // Pass setText to handle extracted text
             // </Suspense> 
+          ) : (
+            <Transcribe setText={setText} />
           )}
 
           <Button

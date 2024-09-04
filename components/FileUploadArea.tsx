@@ -59,7 +59,7 @@ const FileUploadArea: React.FC<FileUploadAreaProps> = ({ setText }) => {
     <div>
       <form
         // action={FormAction}
-        className="max-w-[400px] w-full border-2 border-dashed border-gray-600 rounded-lg p-12 text-center cursor-pointer flex items-center justify-center h-20"
+        className="my-4 max-w-[400px] w-full border-2 border-dashed border-gray-600 rounded-lg p-8 text-center cursor-pointer flex items-center justify-center h-20"
         {...getRootProps()}
       >
         <p>Drag and drop some files here, or click to select files</p>
@@ -103,7 +103,7 @@ const FileUploadArea: React.FC<FileUploadAreaProps> = ({ setText }) => {
             ))}
           </ul>
           <button
-            className="mt-4 cursor-pointer bg-blue-500 text-white px-4 py-2 rounded"
+            className="my-4 cursor-pointer bg-blue-500 text-white px-4 py-2 rounded"
             onClick={handlePDFs}
             type="submit"
           >

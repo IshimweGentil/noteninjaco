@@ -31,7 +31,7 @@ import Transcribe from "@/components/Transcribe"
 
 const GeneratePage = () => {
   const { isLoaded, isSignedIn, user } = useUser();
-  const [inputMethod, setInputMethod] = useState<"text" | "pdf">("text");
+  const [inputMethod, setInputMethod] = useState<"textWithSpeech" | "pdf">("textWithSpeech");
   const [flashcards, setFlashcards] = useState<
     { front: string; back: string }[]
   >([]);
@@ -48,11 +48,11 @@ const GeneratePage = () => {
   const handleInputMethodChange = (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
-    setInputMethod(event.target.value as "text" | "pdf");
+    setInputMethod(event.target.value as "textWithSpeech" | "pdf");
   };
 
   const handleSubmit = async () => {
-    const requestData = inputMethod === "text" ? text : ""; // Placeholder for PDF handling logic
+    const requestData = inputMethod === "textWithSpeech" ? text : "pdf";
     fetch("/api/generate", {
       method: "POST",
       body: requestData,
@@ -133,7 +133,7 @@ const GeneratePage = () => {
             onChange={handleInputMethodChange}
           >
             <FormControlLabel
-              value="text"
+              value="textWithSpeech"
               control={<Radio />}
               label="Paste Text"
             />
@@ -142,28 +142,12 @@ const GeneratePage = () => {
               control={<Radio />}
               label="Upload PDF"
             />
-            <FormControlLabel
-              value="transcribe"
-              control={<Radio />}
-              label="Record Audio"
-            />
           </RadioGroup>
 
-          {inputMethod === "text" ? (
-            <TextField
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-              label="Enter Text"
-              fullWidth
-              multiline
-              rows={4}
-              variant="outlined"
-              sx={{ mb: 2 }}
-            />
-          ) : inputMethod === "pdf" ? (
-            <FileUploadArea setText={setText} /> // Pass setText to handle extracted text
-          ) : (
+          {inputMethod === "textWithSpeech" ? (
             <Transcribe text={text} setText={setText} />
+          ) : (
+            <FileUploadArea setText={setText} /> // Pass setText to handle extracted text
           )}
 
           <Button

@@ -90,7 +90,7 @@ const Transcribe: React.FC<FileUploadAreaProps> = ({ text, setText }) => {
             onChange={(e) => setText(e.target.value)}
             placeholder="Speech to text will be pasted here..."
             className="p-2 text-black bg-[#f1f1f1] w-full resize-none"
-            rows={3}
+            rows={15}
             value={text || ""}
           />
         </div>

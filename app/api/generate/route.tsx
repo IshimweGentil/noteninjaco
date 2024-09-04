@@ -31,26 +31,58 @@ You should return in the following JSON format:
 }
 `;
 
+// Define the structure of a flashcard
+interface Flashcard {
+  front: string;
+  back: string;
+}
+
+// Define the structure of the API response
+interface FlashcardResponse {
+  flashcards: Flashcard[];
+}
+
 // Export the POST function to handle the POST request
 export async function POST(req: Request) {
+  // Ensure the API key is set
+  if (!process.env.OPENAI_API_KEY) {
+    return NextResponse.json({ error: "OpenAI API key is not set" }, { status: 500 });
+  }
+
   const openai = new OpenAI({ 
-    apiKey: process.env.OPENAI_API_KEY!,
+    apiKey: process.env.OPENAI_API_KEY,
   });
   
-  const data = await req.text();
+  try {
+    const data = await req.text();
 
-  // OpenAI API call
-  const completion = await openai.chat.completions.create({
-    messages: [
-      { role: "system", content: systemPrompt },
-      { role: "user", content: data },
-    ],
-    model: "gpt-4o-mini",
-    response_format: { type: "json_object" },
-  });
+    // OpenAI API call
+    const completion = await openai.chat.completions.create({
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: data },
+      ],
+      model: "gpt-4-0314",
+      response_format: { type: "json_object" },
+    });
 
-  const flashcards = JSON.parse(completion.choices[0].message.content);
+    const content = completion.choices[0].message.content;
 
-  // Return the flashcards as a JSON response
-  return NextResponse.json(flashcards.flashcards);
+    if (!content) {
+      throw new Error("Received empty content from OpenAI API");
+    }
+
+    const parsedContent: FlashcardResponse = JSON.parse(content);
+
+    // Validate the parsed content
+    if (!Array.isArray(parsedContent.flashcards)) {
+      throw new Error("Invalid response format from OpenAI API");
+    }
+
+    // Return the flashcards as a JSON response
+    return NextResponse.json(parsedContent.flashcards);
+  } catch (error) {
+    console.error("Error generating flashcards:", error);
+    return NextResponse.json({ error: "Failed to generate flashcards" }, { status: 500 });
+  }
 }

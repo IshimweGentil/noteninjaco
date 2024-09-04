@@ -35,8 +35,7 @@ const Hero = () => {
           />
           <p className="pb-10 tracking-widest text-xs text-center text-blue-100 max-w-80">
             Designed and developed by 
-            Ishimwe Gentil, 
-            Josh Temidayo,
+            Ishimwe Gentil,
             Mounir Mkhallati,
             and Kyle Huang.
           </p>

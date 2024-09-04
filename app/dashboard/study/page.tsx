@@ -2,10 +2,11 @@
 
 import React, { useState, useEffect } from 'react';
 import { useUser } from '@clerk/nextjs';
+import { useRouter } from 'next/navigation';
 import { db } from '@/firebase';
 import { collection, doc, getDoc, setDoc } from 'firebase/firestore';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
-import { HoverEffect, Card, CardTitle, CardDescription } from '@/components/ui/card-hover-effect';
+import { HoverEffect } from '@/components/ui/card-hover-effect';
 
 interface FlashcardSet {
   name: string;
@@ -15,6 +16,7 @@ const StudyPage: React.FC = () => {
   const { isLoaded, isSignedIn, user } = useUser();
   const [flashcardSets, setFlashcardSets] = useState<FlashcardSet[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
     async function getFlashcardSets() {
@@ -53,7 +55,7 @@ const StudyPage: React.FC = () => {
       {flashcardSets.length === 0 ? (
         <p>You don't have any saved flashcard sets yet.</p>
       ) : (
-        <HoverEffect items={hoverEffectItems} />
+        <HoverEffect items={hoverEffectItems} isLink={true} />
       )}
     </div>
   );

@@ -48,7 +48,7 @@ const StudySetPage = () => {
   const { isLoaded, isSignedIn, user } = useUser();
   const params = useParams();
   const router = useRouter();
-  const setName = params.setName as string;
+  const setName = decodeURIComponent(params.setName as string);
   const [flashcards, setFlashcards] = useState<Flashcard[]>([]);
   const [flipped, setFlipped] = useState<{ [key: string]: boolean }>({});
   const [isLoading, setIsLoading] = useState(true);
@@ -111,14 +111,15 @@ const StudySetPage = () => {
       <HoverEffect 
         items={hoverEffectItems} 
         className="grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+        isLink={false}
       >
         {(item, index) => (
           <div 
             onClick={() => handleCardClick(flashcards[index].id)}
-            className="h-full transition-transform duration-200 transform hover:scale-105 active:scale-95"
+            className="h-full w-full transition-transform duration-200 transform hover:scale-105 active:scale-95"
           >
-            <Card className="h-full flex flex-col justify-between transition-all duration-300 ease-in-out">
-              <CardTitle className="flex-grow flex items-center justify-center p-4">
+            <Card className="h-full flex flex-col justify-between transition-all duration-300 ease-in-out cursor-pointer">
+              <CardTitle className="flex-grow flex items-center text-center justify-center p-4">
                 <span className={`transition-opacity duration-300 ${flipped[flashcards[index].id] ? 'opacity-0' : 'opacity-100'}`}>
                   {item.title}
                 </span>
@@ -139,17 +140,17 @@ const StudySetPage = () => {
   const renderSingleCardView = () => (
     <div className="flex flex-col items-center">
       <div 
-        className="relative w-full max-w-md h-60 cursor-pointer transition-transform duration-200 transform hover:scale-105 active:scale-95"
+        className="relative w-full max-w-md h-60 md:h-80 lg:h-72 cursor-pointer transition-transform duration-200 transform hover:scale-105 active:scale-95"
         onClick={() => handleCardClick(flashcards[currentCardIndex].id)}
       >
         <div className={`w-full h-full transition-all duration-500 [transform-style:preserve-3d] ${flipped[flashcards[currentCardIndex].id] ? '[transform:rotateY(180deg)]' : ''}`}>
           <div className="absolute w-full h-full [backface-visibility:hidden] border-2 border-gray-700 rounded-lg p-4 flex items-center justify-center">
-            <p className="text-lg font-semibold text-center">
+            <p className="text-lg md:text-xl lg:text-2xl font-semibold text-center">
               {flashcards[currentCardIndex].front}
             </p>
           </div>
           <div className="absolute w-full h-full [backface-visibility:hidden] [transform:rotateY(180deg)] border-2 border-gray-700 rounded-lg p-4 flex items-center justify-center">
-            <p className="text-lg font-semibold text-center">
+            <p className="text-lg md:text-xl lg:text-2xl font-semibold text-center">
               {flashcards[currentCardIndex].back}
             </p>
           </div>
@@ -176,11 +177,11 @@ const StudySetPage = () => {
   );
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="mb-6">
+    <div className="container mx-auto px-4">
+      <div className="mb-2">
         <Tabs tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} />
       </div>
-      <h1 className="text-2xl font-bold mb-6">Studying: {setName}</h1>
+      <h1 className="text-2xl mt-4 font-bold mb-6">Studying: {setName}</h1>
       <div className="mt-6">
         {activeTab === 'grid' ? renderGridView() : renderSingleCardView()}
       </div>

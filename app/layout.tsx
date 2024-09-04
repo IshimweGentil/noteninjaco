@@ -1,8 +1,16 @@
 import "./globals.css";
+import type { Metadata } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
 import NavBar from "../components/NavBar";
 import NavBarMobile from "../components/NavBarMobile";
-import Footer from "../components/Footer";
+
+export const metadata: Metadata = {
+  title: "Note Ninja",
+  description: "Study using AI",
+  icons: {
+    icon: "./favicon.ico",
+  },
+};
 
 export default function RootLayout({
   children,

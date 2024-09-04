@@ -24,11 +24,11 @@ export const parsePDFs = async (files: File[]): Promise<string[]> => {
     const result = await response.json();
     console.log('Server response:', result);
 
-    if (!result.texts) {
+    if (!result.text) {
       throw new Error('Unexpected server response format');
     }
 
-    return result.texts;
+    return result.text;
   } catch (error) {
     console.error('Error in parsePDFs:', error);
     throw error;

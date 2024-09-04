@@ -166,7 +166,7 @@ const GeneratePage = () => {
               <FileUploadArea setText={setText} /> // Pass setText to handle extracted text
             // </Suspense> 
           ) : (
-            <Transcribe setText={setText} />
+            <Transcribe setText={text, setText} />
           )}
 
           <Button

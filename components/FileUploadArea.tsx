@@ -46,9 +46,9 @@ const FileUploadArea: React.FC<FileUploadAreaProps> = ({ setText }) => {
         return;
       }
 
-      const texts = await parsePDFs(pdfs);
-      console.log(texts);
-      setText(texts);
+      const text = await parsePDFs(pdfs);
+      console.log(text);
+      setText(text);
     } catch (error) {
       console.error("Error processing PDFs:", error);
       setError("Failed to process PDFs. Please try again.");

@@ -51,13 +51,13 @@ export async function POST(req: Request) {
       }
     })
 
-    const texts = await Promise.all(filePromises);
-    console.log(`Number of processed texts: ${texts.length}`);
+    const text = await Promise.all(filePromises);
+    console.log(`Number of processed texts: ${text.length}`);
 
-    const result = texts.filter(text => text.length > 0).join('\n');
+    const result = text.filter(txt => txt.length > 0).join('\n');
     console.log(`Number of non-empty texts: ${result.length}`);
 
-    return NextResponse.json({ texts: result });
+    return NextResponse.json({ text: result });
   } catch (error) {
     console.error("Error in POST handler:", error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });

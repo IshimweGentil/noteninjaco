@@ -1,26 +1,61 @@
 'use client'
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useUser } from '@clerk/nextjs';
-import StudyContent from '@/components/StudyContent';
+import { db } from '@/firebase';
+import { collection, doc, getDoc, setDoc } from 'firebase/firestore';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import { HoverEffect, Card, CardTitle, CardDescription } from '@/components/ui/card-hover-effect';
 
-const StudyPage = () => {
+interface FlashcardSet {
+  name: string;
+}
+
+const StudyPage: React.FC = () => {
   const { isLoaded, isSignedIn, user } = useUser();
+  const [flashcardSets, setFlashcardSets] = useState<FlashcardSet[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    async function getFlashcardSets() {
+      if (!user) return;
+      const docRef = doc(collection(db, 'users'), user.id);
+      const docSnap = await getDoc(docRef);
+
+      if (docSnap.exists()) {
+        const collections = docSnap.data().flashcards || [];
+        setFlashcardSets(collections);
+      } else {
+        await setDoc(docRef, { flashcards: [] });
+      }
+      setIsLoading(false);
+    }
+    getFlashcardSets();
+  }, [user]);
 
   if (!isLoaded || !isSignedIn) {
     return <LoadingSpinner />;
   }
 
+  if (isLoading) {
+    return <LoadingSpinner />;
+  }
+
+  const hoverEffectItems = flashcardSets.map(set => ({
+    title: set.name,
+    description: `${set.name} flashcard set`,
+    link: `/dashboard/study/${encodeURIComponent(set.name)}`
+  }));
+
   return (
-    <>
-      {/* eslint-disable-next-line react/no-unescaped-entities */}
-      <span className="font-bold text-2xl">Let's Study</span>
-      <div className="border-dashed border-zinc-500 w-full h-12"></div>
-      <div className="border-dashed border-zinc-500 w-full h-64"></div>
-      
-      <StudyContent />
-    </> 
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-2xl">Your Flashcard Sets</h1>
+      {flashcardSets.length === 0 ? (
+        <p>You don't have any saved flashcard sets yet.</p>
+      ) : (
+        <HoverEffect items={hoverEffectItems} />
+      )}
+    </div>
   );
 };
 

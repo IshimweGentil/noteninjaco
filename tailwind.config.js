@@ -6,9 +6,22 @@ module.exports = {
     "./app/**/*.{js,ts,jsx,tsx,mdx}", // If using the new app directory
   ],
   theme: {
-    extend: {},
+    extend: {
+      transitionProperty: {
+        'height': 'height',
+        'spacing': 'margin, padding',
+      },
+      transitionDuration: {
+        '0': '0ms',
+        '2000': '2000ms',
+      }
+    },
   },
-  plugins: [
-  ],
-};
-
+  variants: {
+    extend: {
+      scale: ['active', 'group-hover'],
+      transform: ['hover', 'focus'],
+    }
+  },
+  plugins: [],
+}

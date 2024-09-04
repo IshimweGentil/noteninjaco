@@ -1,68 +1,50 @@
 import React, { useState } from 'react';
 import { useUser } from '@clerk/nextjs';
 import { db } from '@/firebase';
-import {
-  Container,
-  TextField,
-  Box,
-  Button,
-  Typography,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogContentText,
-  DialogActions,
-  Grid,
-  Card,
-  CardActionArea,
-  CardContent,
-  Paper,
-} from "@mui/material";
 import { writeBatch, doc, getDoc, collection } from 'firebase/firestore';
 import MagicButton from './ui/MagicButton';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Loader2 } from 'lucide-react';
+import PreviewModal from './PreviewModal';
 
-const TextTab = () => {
+interface Flashcard {
+  front: string;
+  back: string;
+}
+
+const TextTab: React.FC = () => {
   const { user } = useUser();
   const [text, setText] = useState('');
-  const [flashcards, setFlashcards] = useState([]);
-  const [flipped, setFlipped] = useState<{ [key: number]: boolean }>({});
-  const [name, setName] = useState('');
-  const [open, setOpen] = useState(false);
+  const [flashcards, setFlashcards] = useState<Flashcard[]>([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleGenerate = async () => {
-    // Send the text to the API to generate flashcards
-    fetch('/api/generate', {
-      method: 'POST',
-      body: JSON.stringify({ text }),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    })
-      .then((res) => res.json())
-      .then((data) => setFlashcards(data));
+    if (text.trim() === '') return; // Prevent generation if input is empty
+    setIsLoading(true);
+    try {
+      const response = await fetch('/api/generate', {
+        method: 'POST',
+        body: JSON.stringify({ text }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      const data = await response.json();
+      setFlashcards(data);
+      setIsModalOpen(true);
+    } catch (error) {
+      console.error('Error generating flashcards:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleCardClick = (index: number) => {
-    setFlipped((prev) => ({
-      ...prev,
-      [index]: !prev[index],
-    }));
-  };
-
-  const handleOpen = () => {
-    setOpen(true);
-  };
-
-  const handleClose = () => {
-    setOpen(false);
-  };
-
-  const saveFlashcards = async () => {
-    if (!name) {
-      alert('Please enter a name for your flashcard set');
+  const handleSave = async (name: string) => {
+    if (!user) {
+      console.error('User not authenticated');
       return;
     }
+
     const batch = writeBatch(db);
     const userDocRef = doc(collection(db, 'users'), user.id);
     const docSnap = await getDoc(userDocRef);
@@ -81,14 +63,18 @@ const TextTab = () => {
     }
 
     const colRef = collection(userDocRef, name);
-    flashcards.forEach((flashcard: any) => {
+    flashcards.forEach((flashcard: Flashcard) => {
       const cardDocRef = doc(colRef);
       batch.set(cardDocRef, flashcard);
     });
 
-    await batch.commit();
-    setOpen(false);
-    // Optionally handle navigation or state reset after saving
+    try {
+      await batch.commit();
+      console.log('Flashcards saved successfully');
+      setIsModalOpen(false);
+    } catch (error) {
+      console.error('Error saving flashcards:', error);
+    }
   };
 
   return (
@@ -101,128 +87,25 @@ const TextTab = () => {
       />
       <div className="flex justify-start">
         <MagicButton
-          title="Generate"
-          icon={<ArrowRight size={16} />}
+          title={isLoading ? "Generating..." : "Generate"}
+          icon={isLoading ? <Loader2 className="animate-spin" size={16} /> : <ArrowRight size={16} />}
           position="right"
           onClick={handleGenerate}
+          disabled={isLoading || text.trim() === ''}
         />
       </div>
 
-      {flashcards.length > 0 && (
-        <Box sx={{ mt: 4 }}>
-          <Typography variant="h5">Flashcards Preview</Typography>
-          <Grid container spacing={3}>
-            {flashcards.map((flashcard, index) => (
-              <Grid item xs={12} sm={6} md={4} key={index}>
-                <Card>
-                  <CardActionArea onClick={() => handleCardClick(index)}>
-                    <CardContent>
-                      <Box
-                        sx={{
-                          perspective: "1000px",
-                          position: "relative",
-                          width: "100%",
-                          height: "200px",
-                        }}
-                      >
-                        <Box
-                          sx={{
-                            transition: "transform 0.6s",
-                            transformStyle: "preserve-3d",
-                            position: "relative",
-                            width: "100%",
-                            height: "100%",
-                            transform: flipped[index]
-                              ? "rotateY(180deg)"
-                              : "rotateY(0deg)",
-                          }}
-                        >
-                          {/* Front Side */}
-                          <Box
-                            sx={{
-                              position: "absolute",
-                              width: "100%",
-                              height: "100%",
-                              backfaceVisibility: "hidden",
-                              display: "flex",
-                              justifyContent: "center",
-                              alignItems: "center",
-                              backgroundColor: "#fff",
-                              borderRadius: "8px",
-                              boxShadow: "0 4px 8px 0 rgba(0, 0, 0, 0.2)",
-                            }}
-                          >
-                            <Typography variant="h6">
-                              {flashcard.front}
-                            </Typography>
-                          </Box>
-                          {/* Back Side */}
-                          <Box
-                            sx={{
-                              position: "absolute",
-                              width: "100%",
-                              height: "100%",
-                              backfaceVisibility: "hidden",
-                              display: "flex",
-                              justifyContent: "center",
-                              alignItems: "center",
-                              backgroundColor: "#f0f0f0",
-                              transform: "rotateY(180deg)",
-                              borderRadius: "8px",
-                              boxShadow: "0 4px 8px 0 rgba(0, 0, 0, 0.2)",
-                            }}
-                          >
-                            <Typography variant="h6">
-                              {flashcard.back}
-                            </Typography>
-                          </Box>
-                        </Box>
-                      </Box>
-                    </CardContent>
-                  </CardActionArea>
-                </Card>
-              </Grid>
-            ))}
-          </Grid>
-
-          <Box
-            sx={{
-              mt: 4,
-              display: "flex",
-              justifyContent: "center",
-            }}
-          >
-            <Button variant="contained" color="primary" onClick={handleOpen}>
-              Save
-            </Button>
-          </Box>
-        </Box>
-      )}
-
-      <Dialog open={open} onClose={handleClose}>
-        <DialogTitle>Save Flashcards</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            Please enter a name for your flashcards collection
-          </DialogContentText>
-          <TextField
-            autoFocus
-            margin="dense"
-            label="Collection Name"
-            type="text"
-            fullWidth
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            variant="outlined"
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleClose}>Cancel</Button>
-          <Button onClick={saveFlashcards}>Save</Button>
-        </DialogActions>
-      </Dialog>
+      <PreviewModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        items={flashcards}
+        onSave={handleSave}
+        onRegenerate={handleGenerate}
+        isLoading={isLoading}
+        title="Flashcard Preview"
+      />
     </div>
   );
-}
+};
 
 export default TextTab;

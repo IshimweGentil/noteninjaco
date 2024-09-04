@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { XIcon, ArrowRight, Loader2 } from 'lucide-react';
+import { XIcon, ArrowRight, Loader2, CheckCircle } from 'lucide-react';
 import { motion, AnimatePresence } from "framer-motion";
 import MagicButton from './ui/MagicButton';
 
@@ -30,13 +30,18 @@ const PreviewModal: React.FC<PreviewModalProps> = ({
   const [name, setName] = useState('');
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
 
   if (!isOpen) return null;
 
   const handleSave = () => {
     if (name.trim()) {
       onSave(name);
-      onClose();
+      setShowSuccessMessage(true);
+      setTimeout(() => {
+        setShowSuccessMessage(false);
+        onClose();
+      }, 2000);
     }
   };
 
@@ -80,7 +85,6 @@ const PreviewModal: React.FC<PreviewModalProps> = ({
 
             <motion.div
               className="mb-4"
-              whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
               <div
@@ -119,6 +123,9 @@ const PreviewModal: React.FC<PreviewModalProps> = ({
                 >
                   Previous
                 </button>
+                <span className="text-blue-100 self-center">
+                  {currentIndex + 1} / {items.length}
+                </span>
                 <button
                   onClick={handleNext}
                   className="px-4 py-2 bg-slate-800 text-blue-100 rounded hover:bg-slate-700 transition-colors"
@@ -160,6 +167,21 @@ const PreviewModal: React.FC<PreviewModalProps> = ({
                 Cancel
               </button>
             </div>
+
+            <AnimatePresence>
+              {showSuccessMessage && (
+                <motion.div
+                  initial={{ opacity: 0, y: 50 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 50 }}
+                  transition={{ duration: 0.3 }}
+                  className="fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg flex items-center space-x-2"
+                >
+                  <CheckCircle size={20} />
+                  <span>Flashcard set saved successfully!</span>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </motion.div>
         </motion.div>
       )}

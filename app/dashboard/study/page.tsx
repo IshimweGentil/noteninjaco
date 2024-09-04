@@ -63,7 +63,7 @@ const StudyPage: React.FC = () => {
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-2xl mb-6">Your Flashcard Sets</h1>
       {flashcardSets.length === 0 ? (
-        <p>You don't have any saved flashcard sets yet.</p>
+        <p>You don&apos;t have any saved flashcard sets yet.</p>
       ) : (
         <HoverEffect items={hoverEffectItems} isLink={true}>
           {(item, index) => (

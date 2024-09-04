@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, Suspense } from "react";
+import React, { useState } from "react";
 import { useUser } from "@clerk/nextjs";
 import FileUploadArea from "@/components/FileUploadArea";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
@@ -27,7 +27,6 @@ import {
   FormControlLabel,
 } from "@mui/material";
 import { writeBatch, doc, getDoc, collection } from "firebase/firestore";
-import { IconMessages } from "@tabler/icons-react";
 import Transcribe from "@/components/Transcribe"
 
 const GeneratePage = () => {
@@ -162,11 +161,9 @@ const GeneratePage = () => {
               sx={{ mb: 2 }}
             />
           ) : inputMethod === "pdf" ? (
-            // <Suspense fallback="Loading...">
-              <FileUploadArea setText={setText} /> // Pass setText to handle extracted text
-            // </Suspense> 
+            <FileUploadArea setText={setText} /> // Pass setText to handle extracted text
           ) : (
-            <Transcribe setText={text, setText} />
+            <Transcribe text={text} setText={setText} />
           )}
 
           <Button

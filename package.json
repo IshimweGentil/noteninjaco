@@ -20,6 +20,7 @@
     "@react-three/fiber": "^8.17.6",
     "@tabler/icons-react": "^3.14.0",
     "@tailwindcss/aspect-ratio": "^0.4.2",
+    "@types/dom-speech-recognition": "^0.0.4",
     "@types/three": "^0.168.0",
     "@vercel/node": "^3.2.10",
     "ai": "^3.3.21",
@@ -53,7 +54,7 @@
     "tesseract.js": "^5.1.1",
     "three": "^0.168.0",
     "uuid": "^10.0.0",
-    "vercel": "^32.3.0"
+    "vercel": "^37.3.0"
   },
   "devDependencies": {
     "@types/dompurify": "^3.0.5",

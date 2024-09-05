@@ -5,6 +5,7 @@ import { useUser } from "@clerk/nextjs";
 import Tabs from "@/components/Tabs";
 import FileTab from "@/components/FileTab";
 import TextTab from "@/components/TextTab";
+import AudioTab from "@/components/AudioTab";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import { db } from '@/firebase';
 import { writeBatch, doc, getDoc, collection } from 'firebase/firestore';
@@ -32,6 +33,7 @@ const GeneratePage = () => {
   const tabs = [
     { id: "file", label: "Files" },
     { id: "text", label: "Text" },
+    { id: "audio", label: "Audio" },
   ];
 
   const handleGenerate = async () => {
@@ -105,6 +107,7 @@ const GeneratePage = () => {
         <div className="mt-2">
           {activeTab === "file" && <FileTab text={text} setText={setText} />}
           {activeTab === "text" && <TextTab text={text} setText={setText} />}
+          {activeTab === "audio" && <AudioTab text={text} setText={setText} />}
         </div>
         <div>
           <div className="flex justify-start">

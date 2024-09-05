@@ -1,12 +1,12 @@
 import React from 'react';
 import FileUploadArea from '@/components/FileUploadArea';
 
-interface FileUploadAreaProps {
+interface FileTabProps {
   text: string;
-  setText: (text: string) => void;
+  setText: React.Dispatch<React.SetStateAction<string>>;
 }
 
-const FileTab: React.FC<FileUploadAreaProps> = ({text, setText}) => {
+const FileTab: React.FC<FileTabProps> = ({text, setText}) => {
   return (
     <FileUploadArea text={text} setText={setText} />
   );

@@ -33,24 +33,35 @@ You should return in the following JSON format:
 
 // Export the POST function to handle the POST request
 export async function POST(req: Request) {
-  const openai = new OpenAI({ 
-    apiKey: process.env.OPENAI_API_KEY!,
-  });
+  try {
+    const openai = new OpenAI({ 
+      apiKey: process.env.OPENAI_API_KEY,
+    });
 
-  const data = await req.text();
+    const data = await req.text();
 
-  // OpenAI API call
-  const completion = await openai.chat.completions.create({
-    messages: [
-      { role: "system", content: systemPrompt },
-      { role: "user", content: data },
-    ],
-    model: "gpt-4o-mini",
-    response_format: { type: "json_object" },
-  });
+    // OpenAI API call
+    const completion = await openai.chat.completions.create({
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: data },
+      ],
+      model: "gpt-4-1106-preview", // Updated to the correct model name
+      response_format: { type: "json_object" },
+    });
 
-  const flashcards = JSON.parse(completion.choices[0].message.content);
+    const content = completion.choices[0].message.content;
+    
+    if (!content) {
+      throw new Error("No content received from OpenAI");
+    }
 
-  // Return the flashcards as a JSON response
-  return NextResponse.json(flashcards.flashcards);
+    const flashcards = JSON.parse(content);
+
+    // Return the flashcards as a JSON response
+    return NextResponse.json(flashcards.flashcards);
+  } catch (error) {
+    console.error("Error generating flashcards:", error);
+    return NextResponse.json({ error: "Failed to generate flashcards" }, { status: 500 });
+  }
 }

@@ -33,7 +33,7 @@
     "next-env.d.ts",
     ".next/types/**/*.ts",
     "**/*.ts","**/*.tsx"
-  ],
+, "utils/get-stripe.js"  ],
   "exclude": [
     "node_modules"
   ]

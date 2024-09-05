@@ -1,109 +1,107 @@
-import React, { useState } from 'react';
-import { useUser } from '@clerk/nextjs';
-import { db } from '@/firebase';
-import { writeBatch, doc, getDoc, collection } from 'firebase/firestore';
-import MagicButton from './ui/MagicButton';
-import { ArrowRight, Loader2 } from 'lucide-react';
-import PreviewModal from './PreviewModal';
+import { useState, useEffect, useRef } from "react";
+import { IconMicrophone, IconPlayerPause } from "@tabler/icons-react";
 
-interface Flashcard {
-  front: string;
-  back: string;
+interface FileUploadAreaProps {
+  text: string;
+  setText: (text: string) => void;
 }
 
-const TextTab: React.FC = () => {
-  const { user } = useUser();
-  const [text, setText] = useState('');
-  const [flashcards, setFlashcards] = useState<Flashcard[]>([]);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+declare global {
+  interface Window {
+    webkitSpeechRecognition: any;
+  }
+}
 
-  const handleGenerate = async () => {
-    if (text.trim() === '') return; // Prevent generation if input is empty
-    setIsLoading(true);
-    try {
-      const response = await fetch('/api/generate', {
-        method: 'POST',
-        body: JSON.stringify({ text }),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-      const data = await response.json();
-      setFlashcards(data);
-      setIsModalOpen(true);
-    } catch (error) {
-      console.error('Error generating flashcards:', error);
-    } finally {
-      setIsLoading(false);
+/**
+ * @ref https://www.youtube.com/watch?v=Q0ZqRIRqcGo - implementing SpeechRecognition feature
+ */
+const TextTab: React.FC<FileUploadAreaProps> = ({ text, setText }) => {
+  const [isRecording, setIsRecording] = useState(false);
+
+  // Reference to store the SpeechRecognition instance
+  const recognitionRef = useRef<any>(null);
+
+  // Function to start recording
+  const startRecording = () => {
+    setIsRecording(true);
+
+    recognitionRef.current = new window.webkitSpeechRecognition();
+    recognitionRef.current.continuous = true;
+    recognitionRef.current.interimResults = true;
+
+    recognitionRef.current.onresult = (event: any) => {
+      let interimTranscript = '';
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const transcript: string = event.results[i][0].transcript;
+        if (event.results[i].isFinal) {
+          setText((prevText) => prevText.concat(transcript));
+        } else {
+          interimTranscript += transcript;
+        }
+      }
+    };
+
+    recognitionRef.current.onerror = (event: any) => {
+      console.error('Speech recognition error:', event.error);
+    };
+
+    recognitionRef.current.start();
+  };
+
+  // cleans effect when the component unmounts
+  useEffect(() => {
+    return () => {
+      if (recognitionRef.current) {
+        recognitionRef.current.stop();
+      }
+    };
+  }, []);
+
+  // stop recording
+  const stopRecording = () => {
+    if (recognitionRef.current) {
+      recognitionRef.current.stop();
+      setIsRecording(false);
     }
   };
 
-  const handleSave = async (name: string) => {
-    if (!user) {
-      console.error('User not authenticated');
-      return;
-    }
-
-    const batch = writeBatch(db);
-    const userDocRef = doc(collection(db, 'users'), user.id);
-    const docSnap = await getDoc(userDocRef);
-
-    if (docSnap.exists()) {
-      const collections = docSnap.data().flashcards || [];
-      if (collections.find((f: any) => f.name === name)) {
-        alert('Flashcard set already exists');
-        return;
-      } else {
-        collections.push({ name });
-        batch.set(userDocRef, { flashcards: collections }, { merge: true });
-      }
+  // toggle recording
+  const handleToggleRecording = () => {
+    if (isRecording) {
+      stopRecording();
     } else {
-      batch.set(userDocRef, { flashcards: [{ name }] });
-    }
-
-    const colRef = collection(userDocRef, name);
-    flashcards.forEach((flashcard: Flashcard) => {
-      const cardDocRef = doc(colRef);
-      batch.set(cardDocRef, flashcard);
-    });
-
-    try {
-      await batch.commit();
-      console.log('Flashcards saved successfully');
-      setIsModalOpen(false);
-    } catch (error) {
-      console.error('Error saving flashcards:', error);
+      startRecording();
     }
   };
 
   return (
-    <div className="space-y-4">
-      <textarea
-        className="w-full h-64 p-2 border-2 border-gray-600 border-dashed rounded-md bg-transparent"
-        placeholder="Enter your text here..."
-        value={text}
-        onChange={(e) => setText(e.target.value)}
-      />
-      <div className="flex justify-start">
-        <MagicButton
-          title={isLoading ? "Generating..." : "Generate"}
-          icon={isLoading ? <Loader2 className="animate-spin" size={16} /> : <ArrowRight size={16} />}
-          position="right"
-          onClick={handleGenerate}
-          disabled={isLoading || text.trim() === ''}
-        />
-      </div>
+    <div className="">
+      <h1 className="font-bold text-2xl mb-4">Live Audio Recording</h1>
+      <button className="mt-4" onClick={handleToggleRecording}>
+        {isRecording ? (
+          <IconPlayerPause
+            className="bg-green-400 hover:bg-red-400 border rounded-full border-black p-2 w-[3rem] h-[3rem]"
+          />
+        ) : (
+          <IconMicrophone
+            className="hover:bg-[#d6d6d6] border rounded-full bg-[rgba(204,204,204,0.3)] p-2 w-[3rem] h-[3rem]"
+          />
+        )}
+        {isRecording ? "Stop" : "Start"}
+      </button>
 
-      <PreviewModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        items={flashcards}
-        onSave={handleSave}
-        onRegenerate={handleGenerate}
-        isLoading={isLoading}
-        title="Flashcard Preview"
-      />
+      <div className="my-4">
+        <h2>Transcription:</h2>
+        <div className="bg-[rgba(204,204,204,0.3)]">
+          <textarea
+            onChange={(e) => setText(e.target.value)}
+            placeholder="Speech to text will be pasted here..."
+            className="p-2 text-opacity-100 bg-transparent w-full resize-none"
+            rows={15}
+            value={text || ""}
+          />
+        </div>
+      </div>
     </div>
   );
 };

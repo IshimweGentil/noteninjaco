@@ -1,9 +1,8 @@
 "use client";
 
-import { db } from "@/firebase";
-import { useUser, SignedOut, SignedIn, UserButton } from "@clerk/nextjs";
+import React, { useState } from "react";
+import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
 import {
   Container,
   TextField,
@@ -22,7 +21,7 @@ import {
   Paper,
 } from "@mui/material";
 import { writeBatch, doc, getDoc, collection } from "firebase/firestore";
-import {}
+import { db } from "@/firebase";
 
 export default function Generate() {
   const { isLoaded, isSignedIn, user } = useUser();
@@ -247,3 +246,4 @@ export default function Generate() {
     </Container>
   );
 }
+

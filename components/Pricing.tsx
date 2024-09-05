@@ -1,16 +1,52 @@
 import React from 'react';
 import { CardSpotlight } from './ui/card-spotlight';
+import getStripe from '@/utils/get-stripe'
+import { basicPrice, proPrice } from '@/app/data/index';
 
 interface PricingCardProps {
   title: string;
-  price: string;
+  price: number;
   features: string[];
 }
+
+// Stripe Integration
+const handleSubmit = async (e: React.MouseEvent<HTMLButtonElement>, price: number) => {
+  e.preventDefault();
+
+  const checkoutSession = await fetch("/api/checkout_session", {
+    method: "POST",
+    headers: {
+      'Content-Type': 'application/json',
+      origin: "http://localhost:3000", // change URL when hosted
+    },
+    body: JSON.stringify({ price }), // price is already a number
+  });
+
+  const checkoutSessionJson = await checkoutSession.json();
+
+  if (checkoutSessionJson.statusCode === 500) {
+    console.error(checkoutSessionJson.message);
+    return;
+  }
+
+  const stripe = await getStripe();
+  if (stripe) {
+    const { error } = await stripe.redirectToCheckout({
+      sessionId: checkoutSessionJson.id,
+    });
+
+    if (error) {
+      console.warn(error.message);
+    }
+  } else {
+    console.error("Failed to load Stripe");
+  }
+};
 
 const PricingCard: React.FC<PricingCardProps> = ({ title, price, features }) => (
   <CardSpotlight className="w-full max-w-xs mx-auto mb-8 md:mb-0">
     <h3 className="text-2xl font-bold text-white mb-4 relative z-20">{title}</h3>
-    <p className="text-4xl font-bold text-blue-100 mb-6 relative z-20">{price}</p>
+    <p className="text-4xl font-bold text-blue-100 mb-6 relative z-20">${price}/month</p>
     <ul className="text-left mb-6 relative z-20">
       {features.map((feature, index) => (
         <li key={index} className="flex items-center text-gray-300 mb-2">
@@ -19,7 +55,12 @@ const PricingCard: React.FC<PricingCardProps> = ({ title, price, features }) => 
         </li>
       ))}
     </ul>
-    <button className="bg-slate-400 text-slate-950 px-6 py-2 rounded-full hover:bg-slate-500 transition duration-300 w-full relative z-20">Choose Plan</button>
+    <button 
+      className="bg-slate-400 text-slate-950 px-6 py-2 rounded-full hover:bg-slate-500 transition duration-300 w-full relative z-20" 
+      onClick={(e) => handleSubmit(e, price)} // price is passed as a number
+    >
+      Choose Plan
+    </button>
   </CardSpotlight>
 )
 
@@ -29,12 +70,12 @@ const Pricing: React.FC = () => (
     <div className="flex flex-col md:flex-row md:justify-center md:space-x-4 space-y-8 md:space-y-0 max-w-2xl mx-auto">
       <PricingCard 
         title="Free" 
-        price="$0/month"
+        price={basicPrice}
         features={['Basic note conversion', 'Limited flashcards', 'Standard support']}
       />
       <PricingCard 
         title="Pro" 
-        price="$2.99/month"
+        price={proPrice}
         features={['Unlimited note conversion', 'Advanced flashcard features', 'Priority support']}
       />
     </div>

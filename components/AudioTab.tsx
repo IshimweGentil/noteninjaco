@@ -30,7 +30,7 @@ const AudioTab: React.FC<AudioTabProps> = ({ text, setText }) => {
         if (event.results[i].isFinal) {
           setText(prevText => prevText + transcript);
         } else {
-          interimTranscript += transcript;
+          interimTranscript += ' ' + transcript;
         }
       }
     };

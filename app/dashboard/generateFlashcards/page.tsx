@@ -1,11 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
-import { useUser } from "@clerk/nextjs";
-import FileUploadArea from "@/components/FileUploadArea";
-import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import { db } from "@/firebase";
+import { useUser, SignedOut, SignedIn, UserButton } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import {
   Container,
   TextField,
@@ -22,40 +20,23 @@ import {
   CardActionArea,
   CardContent,
   Paper,
-  Radio,
-  RadioGroup,
-  FormControlLabel,
 } from "@mui/material";
 import { writeBatch, doc, getDoc, collection } from "firebase/firestore";
-import Transcribe from "@/components/Transcribe"
+import {}
 
-const GeneratePage = () => {
+export default function Generate() {
   const { isLoaded, isSignedIn, user } = useUser();
-  const [inputMethod, setInputMethod] = useState<"textWithSpeech" | "pdf">("textWithSpeech");
-  const [flashcards, setFlashcards] = useState<
-    { front: string; back: string }[]
-  >([]);
+  const [flashcards, setFlashcards] = useState<{ front: string; back: string }[]>([]);
   const [flipped, setFlipped] = useState<Record<number, boolean>>({});
   const [text, setText] = useState<string>("");
   const [name, setName] = useState<string>("");
   const [open, setOpen] = useState<boolean>(false);
   const router = useRouter();
 
-  if (!isLoaded || !isSignedIn) {
-    return <LoadingSpinner />;
-  }
-
-  const handleInputMethodChange = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    setInputMethod(event.target.value as "textWithSpeech" | "pdf");
-  };
-
   const handleSubmit = async () => {
-    const requestData = inputMethod === "textWithSpeech" ? text : "pdf";
     fetch("/api/generate", {
       method: "POST",
-      body: requestData,
+      body: text,
     })
       .then((res) => res.json())
       .then((data) => setFlashcards(data));
@@ -121,35 +102,24 @@ const GeneratePage = () => {
         }}
       >
         <Typography variant="h4">Generate Flashcards</Typography>
-        <Paper sx={{ p: 4, width: "100%" }}>
-          <Typography variant="h6" gutterBottom>
-            Choose Input Method:
-          </Typography>
-          <RadioGroup
-            row
-            aria-label="inputMethod"
-            name="inputMethod"
-            value={inputMethod}
-            onChange={handleInputMethodChange}
-          >
-            <FormControlLabel
-              value="textWithSpeech"
-              control={<Radio />}
-              label="Paste Text"
-            />
-            <FormControlLabel
-              value="pdf"
-              control={<Radio />}
-              label="Upload PDF"
-            />
-          </RadioGroup>
-
-          {inputMethod === "textWithSpeech" ? (
-            <Transcribe text={text} setText={setText} />
-          ) : (
-            <FileUploadArea setText={setText} /> // Pass setText to handle extracted text
-          )}
-
+        <Paper
+          sx={{
+            p: 4,
+            width: "100%",
+          }}
+        >
+          <TextField
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            label="Enter Text"
+            fullWidth
+            multiline
+            rows={4}
+            variant="outlined"
+            sx={{
+              mb: 2,
+            }}
+          />
           <Button
             variant="contained"
             color="primary"
@@ -238,7 +208,13 @@ const GeneratePage = () => {
             ))}
           </Grid>
 
-          <Box sx={{ mt: 4, display: "flex", justifyContent: "center" }}>
+          <Box
+            sx={{
+              mt: 4,
+              display: "flex",
+              justifyContent: "center",
+            }}
+          >
             <Button variant="contained" color="primary" onClick={handleOpen}>
               Save
             </Button>
@@ -270,6 +246,4 @@ const GeneratePage = () => {
       </Dialog>
     </Container>
   );
-};
-
-export default GeneratePage;
+}

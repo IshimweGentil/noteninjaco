@@ -2,17 +2,22 @@ import { NextResponse, NextRequest } from 'next/server'
 import Stripe from 'stripe'
 import { proPrice } from '@/app/data/index';
 
-
 const formatAmountForStripe = (amount: number) => {
   return Math.round(amount * 100)
 }
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
+if (!process.env.STRIPE_SECRET_KEY) {
+  throw new Error('STRIPE_SECRET_KEY is not defined in the environment variables');
+}
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+  apiVersion: '2024-06-20', // Use the latest API version
+});
 
 export async function POST(req: NextRequest) {
   try {
     const { price } = await req.json()
-    const params: any = {
+    const params: Stripe.Checkout.SessionCreateParams = {
       mode: 'subscription',
       payment_method_types: ['card'],
       line_items: [
@@ -20,7 +25,7 @@ export async function POST(req: NextRequest) {
           price_data: {
             currency: 'usd',
             product_data: {
-              name: `${price == proPrice ? 'Pro' : 'Basic'} Subscription`,
+              name: `${price === proPrice ? 'Pro' : 'Basic'} Subscription`,
             },
             unit_amount: formatAmountForStripe(price),
             recurring: {
@@ -46,7 +51,7 @@ export async function POST(req: NextRequest) {
     })
   } catch (error: any) {
     console.error('Error creating checkout session:', error)
-    return new NextResponse(JSON.stringify({ error: { message: error.message } }), {
+    return NextResponse.json({ error: { message: error.message } }, {
       status: 500,
     })
   }

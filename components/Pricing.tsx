@@ -5,21 +5,13 @@ import { basicPrice, proPrice } from '@/app/data/index';
 
 interface PricingCardProps {
   title: string;
-  price: number; // Changed from string to number
+  price: number;
   features: string[];
 }
 
 // Stripe Integration
-const handleSubmit = async (e: any, price: string) => {
+const handleSubmit = async (e: React.MouseEvent<HTMLButtonElement>, price: number) => {
   e.preventDefault();
-
-  // Extract the numeric price
-  const numericPrice = parseFloat(price.replace('$', '').replace('/month', ''));
-
-  if (isNaN(numericPrice)) {
-    console.error('Invalid price format');
-    return;
-  }
 
   const checkoutSession = await fetch("/api/checkout_session", {
     method: "POST",
@@ -27,7 +19,7 @@ const handleSubmit = async (e: any, price: string) => {
       'Content-Type': 'application/json',
       origin: "http://localhost:3000", // change URL when hosted
     },
-    body: JSON.stringify({ price: numericPrice }), // Use numericPrice in cents
+    body: JSON.stringify({ price }), // price is already a number
   });
 
   const checkoutSessionJson = await checkoutSession.json();
@@ -51,8 +43,6 @@ const handleSubmit = async (e: any, price: string) => {
   }
 };
 
-
-
 const PricingCard: React.FC<PricingCardProps> = ({ title, price, features }) => (
   <CardSpotlight className="w-full max-w-xs mx-auto mb-8 md:mb-0">
     <h3 className="text-2xl font-bold text-white mb-4 relative z-20">{title}</h3>
@@ -66,11 +56,11 @@ const PricingCard: React.FC<PricingCardProps> = ({ title, price, features }) => 
       ))}
     </ul>
     <button 
-  className="bg-slate-400 text-slate-950 px-6 py-2 rounded-full hover:bg-slate-500 transition duration-300 w-full relative z-20" 
-  onClick={(e) => handleSubmit(e, price)} // Pass price as a string
->
-  Choose Plan
-</button>
+      className="bg-slate-400 text-slate-950 px-6 py-2 rounded-full hover:bg-slate-500 transition duration-300 w-full relative z-20" 
+      onClick={(e) => handleSubmit(e, price)} // price is passed as a number
+    >
+      Choose Plan
+    </button>
   </CardSpotlight>
 )
 

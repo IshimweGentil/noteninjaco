@@ -15,6 +15,7 @@ declare global {
 const AudioTab: React.FC<AudioTabProps> = ({ text, setText }) => {
   const [isRecording, setIsRecording] = useState(false);
   const recognitionRef = useRef<any>(null);
+  const [isFirst, setIsFirst] = useState(true);
 
   const startRecording = () => {
     setIsRecording(true);
@@ -30,7 +31,7 @@ const AudioTab: React.FC<AudioTabProps> = ({ text, setText }) => {
         if (event.results[i].isFinal) {
           setText(prevText => prevText + transcript);
         } else {
-          interimTranscript += ' ' + transcript;
+          interimTranscript += + (!isFirst ? '. ' : '') + transcript;
         }
       }
     };
@@ -47,12 +48,14 @@ const AudioTab: React.FC<AudioTabProps> = ({ text, setText }) => {
       recognitionRef.current.stop();
       setIsRecording(false);
     }
+    if (isFirst) setIsFirst(false);
   };
 
   const handleToggleRecording = () => {
     if (isRecording) {
       stopRecording();
     } else {
+      if (!isFirst) setText(text + '. ');
       startRecording();
     }
   };

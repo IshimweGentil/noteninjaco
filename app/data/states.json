@@ -1,0 +1,26 @@
+{
+    "services": {
+      
+        "name1": "AI Flashcard Generator",
+        "description1": "Auto generate flashcards to study with given the notes.",
+      
+        "name2": "AI Voice Transcriber",
+        "description2": "Auto transcribe voice into text from lecture through audio.",
+
+        "name3": "Lecture Scraper",
+        "description3": "Scrape text from lecture notes such as PowerPoint, PDF, Microsoft Words, text files, and Google Docs."
+    },
+    "pricing_plans": {
+        "name1": "Basic",
+        "description1": "The basic subscription costs $0 and its features are ...",
+      
+      
+        "name2": "Pro",
+        "description2": "The pro subscription costs $2.99 and its features are ..."
+    },
+    "contact_information": {
+      "name": "NoteNinja.co",
+      "email": "info@noteninja.co",
+      "phone": "(123) 456-7890"
+    }
+  }

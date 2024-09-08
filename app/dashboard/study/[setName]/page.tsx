@@ -109,7 +109,7 @@ const StudySetPage = () => {
     // Replace [important] tags with styled spans
     let formattedText = text.replace(
       /\[important\](.*?)\[\/important\]/g, 
-      '<span class="bg-yellow-500 text-black px-1 rounded font-semibold">$1</span>'
+      '<span class="bg-blue-100 text-black px-1 rounded font-semibold">$1</span>'
     );
 
     // Convert markdown-style headings to HTML headings with classes
@@ -217,7 +217,7 @@ const StudySetPage = () => {
   );
 
   const renderSummaryView = () => (
-    <div className="w-full max-w-3xl mx-auto">
+    <div className="w-full mx-auto">
       <Card className="p-6">
         <CardTitle className="text-2xl font-bold mb-4">Summary</CardTitle>
         <CardDescription className="text-lg prose prose-invert max-w-none">

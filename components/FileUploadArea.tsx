@@ -1,6 +1,7 @@
 import React, { useState, useCallback } from "react";
 import { useDropzone } from "react-dropzone";
 import { filterFiles, parseFiles } from "@/lib/fileUtils";
+import { IconClearAll, IconFileX } from "@tabler/icons-react";
 
 interface FileUploadAreaProps {
   setText: React.Dispatch<React.SetStateAction<string>>;
@@ -60,10 +61,10 @@ const FileUploadArea: React.FC<FileUploadAreaProps> = ({ setText }) => {
   };
 
   return (
-    <div className="border-2 border-dashed border-gray-300 rounded-lg p-4">
+    <div className="border-gray-600">
       <div
         {...getRootProps()}
-        className={`cursor-pointer p-4 text-center ${isDragActive ? 'bg-blue-100' : ''}`}
+        className="border-2 border-dashed border-gray-600 rounded-lg p-12 text-center cursor-pointer flex items-center justify-center h-64 mb-4"
       >
         <input {...getInputProps()} />
         <p>{isDragActive ? "Drop the files here..." : "Drag and drop some files here, or click to select files"}</p>
@@ -82,21 +83,44 @@ const FileUploadArea: React.FC<FileUploadAreaProps> = ({ setText }) => {
       )}
 
       {files.length > 0 && (
-        <div className="mt-4">
-          <h3 className="font-bold">Selected Files:</h3>
-          <ul className="list-disc pl-5">
+        <>
+          <button
+            className="flex mb-2 mt-4 cursor-pointer border rounded-lg py-1 px-2 border-white hover:opacity-70"
+            onClick={(e) => {
+              e.preventDefault();
+              setFiles([]);
+            }}
+          >
+            <IconClearAll />
+            <span className="ml-2">Clear All</span>
+          </button>
+          <ul className="flex flex-col border border-gray-500 rounded-lg overflow-hidden">
             {files.map((file, index) => (
-              <li key={`${file.name}-${index}`}>{file.name}</li>
+              <li
+                key={`${file.name}-${index}`}
+                className="flex justify-between items-center border-b border-gray-500 last:border-b-0 p-2"
+              >
+                <p>{file.name}</p>
+                <IconFileX
+                  className="cursor-pointer hover:scale-105 hover:opacity-70"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setFiles((files) =>
+                      files.filter((f) => f.name !== file.name)
+                    );
+                  }}
+                />
+              </li>
             ))}
           </ul>
           <button
-            className="mt-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded disabled:opacity-50"
+            className="mt-4 mb-4 cursor-pointer bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 disabled:opacity-50"
             onClick={handleFiles}
             disabled={isLoading}
           >
             {isLoading ? "Processing..." : "Process Files"}
           </button>
-        </div>
+        </>
       )}
     </div>
   );

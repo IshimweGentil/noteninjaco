@@ -109,7 +109,7 @@ const StudySetPage = () => {
     // Replace [important] tags with styled spans
     let formattedText = text.replace(
       /\[important\](.*?)\[\/important\]/g, 
-      '<span class="bg-blue-100 text-black px-1 rounded font-semibold">$1</span>'
+      '<span class="bg-blue-100  text-black px-1 rounded font-semibold">$1</span>'
     );
 
     // Convert markdown-style headings to HTML headings with classes

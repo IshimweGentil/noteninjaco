@@ -1,10 +1,10 @@
-// Filter files based on extension
-export const filterFiles = (files: File[], fileExtensionName: string): File[] => {
-  return files.filter((file) => file.name.toLowerCase().endsWith('.' + fileExtensionName));
-}
+export const filterFiles = (files: File[], allowedExtensions: string[]): File[] => {
+  return files.filter((file) => 
+    allowedExtensions.some(ext => file.name.toLowerCase().endsWith(`.${ext}`))
+  );
+};
 
-// Read and parse a file
-export const parsePDFs = async (files: File[]): Promise<string[]> => {
+export const parseFiles = async (files: File[]): Promise<string> => {
   const formData = new FormData();
   files.forEach((file, index) => {
     formData.append(`file-${index}`, file);
@@ -17,20 +17,28 @@ export const parsePDFs = async (files: File[]): Promise<string[]> => {
     });
 
     if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`Failed to upload files: ${response.status} ${response.statusText}. Server response: ${errorText}`);
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
 
     const result = await response.json();
-    console.log('Server response:', result);
 
-    if (!result.text) {
+    if (result.text === undefined) {
+      console.error('Unexpected server response:', result);
       throw new Error('Unexpected server response format');
+    }
+
+    if (result.text === '') {
+      console.warn('Server returned empty text');
+      return 'No text could be extracted from the file(s).';
     }
 
     return result.text;
   } catch (error) {
-    console.error('Error in parsePDFs:', error);
-    throw error;
+    console.error('Error in parseFiles:', error);
+    if (error instanceof Error) {
+      throw new Error(`Failed to parse files: ${error.message}`);
+    } else {
+      throw new Error('An unknown error occurred while parsing files');
+    }
   }
-}
+};

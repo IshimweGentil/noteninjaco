@@ -66,7 +66,7 @@ const StudySetPage: React.FC = () => {
       <div className="text-center mt-8">
         <p>No flashcards found for this set.</p>
         <Link href="/dashboard/study">
-          <span className="text-blue-500 hover:underline cursor-pointer">Back to Flashcard Sets</span>
+          <span className="text-blue-500 hover:underline cursor-pointer">Back to Sets</span>
         </Link>
       </div>
     );
@@ -103,7 +103,7 @@ const StudySetPage: React.FC = () => {
         </button>
       </div>
       <Link href="/dashboard/study">
-        <span className="text-blue-500 hover:underline cursor-pointer">Back to Flashcard Sets</span>
+        <span className="text-blue-500 hover:underline cursor-pointer">Back to Sets</span>
       </Link>
     </div>
   );

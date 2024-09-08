@@ -54,6 +54,7 @@ const StudyPage: React.FC = () => {
   }
 
   const hoverEffectItems = flashcardSets.map(set => ({
+    id: set.name, // Use the set name as a unique id
     title: set.name,
     description: `${set.name} flashcard set`,
     link: `/dashboard/study/${encodeURIComponent(set.name)}`

@@ -115,6 +115,7 @@ const StudySetPage = () => {
       >
         {(item, index) => (
           <div 
+            key={flashcards[index].id}
             onClick={() => handleCardClick(flashcards[index].id)}
             className="h-full w-full transition-transform duration-200 transform hover:scale-105 active:scale-95"
           >

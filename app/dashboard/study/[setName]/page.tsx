@@ -8,6 +8,9 @@ import { collection, doc, getDocs, getDoc } from 'firebase/firestore';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import BackIcon from '@/components/ui/BackIcon';
 import { HoverEffect, Card, CardTitle, CardDescription } from '@/components/ui/card-hover-effect';
+import ChatButton from '@/components/ChatButton';
+import { Chat } from '@/components/Chat';
+
 
 interface Tab {
   id: string;
@@ -60,6 +63,15 @@ const StudySetPage = () => {
   const [activeTab, setActiveTab] = useState('single');
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const [setType, setSetType] = useState<'flashcards' | 'summary'>('flashcards');
+  const [isVisible, setIsVisible] = useState(false);
+
+  const toggleVisibility = useCallback(() => {
+    setIsVisible(prevState => !prevState);
+  }, []);
+  
+  const closeChat = useCallback(() => {
+    setIsVisible(false);
+  }, []);
 
   useEffect(() => {
     async function getStudySet() {
@@ -250,6 +262,8 @@ const StudySetPage = () => {
           Back to Flashcard Sets
         </div>
       </div>
+      <ChatButton onClick={toggleVisibility} isVisible={isVisible} />
+      {isVisible && <Chat isVisible={isVisible} setIsVisible={setIsVisible} closeChat={closeChat} />}
     </div>
   );
 };

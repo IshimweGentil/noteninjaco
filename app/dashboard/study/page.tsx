@@ -2,37 +2,45 @@
 
 import React, { useState, useEffect } from 'react';
 import { useUser } from '@clerk/nextjs';
-import { useRouter } from 'next/navigation';
 import { db } from '@/firebase';
 import { collection, doc, getDoc, setDoc, updateDoc, arrayRemove } from 'firebase/firestore';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import { HoverEffect, Card, CardTitle, CardDescription } from '@/components/ui/card-hover-effect';
 import { Trash2 } from 'lucide-react';
 
+
 interface FlashcardSet {
   name: string;
+  type: string;
 }
 
 const StudyPage: React.FC = () => {
   const { isLoaded, isSignedIn, user } = useUser();
   const [flashcardSets, setFlashcardSets] = useState<FlashcardSet[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const router = useRouter();
 
   useEffect(() => {
     async function getFlashcardSets() {
       if (!user) return;
-      const docRef = doc(collection(db, 'users'), user.id);
-      const docSnap = await getDoc(docRef);
-
-      if (docSnap.exists()) {
-        const collections = docSnap.data().flashcards || [];
-        setFlashcardSets(collections);
-      } else {
-        await setDoc(docRef, { flashcards: [] });
+  
+      try {
+        const docRef = doc(collection(db, 'users'), user.id);
+        const docSnap = await getDoc(docRef);
+  
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          const collections = data.flashcards || [];
+          setFlashcardSets(collections);
+        } else {
+          await setDoc(docRef, { flashcards: [], temp: null }); // Initialize with `temp`
+        }
+        setIsLoading(false);
+      } catch (error) {
+        console.error("Error getting document:", error);
+        setIsLoading(false);
       }
-      setIsLoading(false);
     }
+  
     getFlashcardSets();
   }, [user]);
 
@@ -56,7 +64,7 @@ const StudyPage: React.FC = () => {
   const hoverEffectItems = flashcardSets.map(set => ({
     id: set.name, // Use the set name as a unique id
     title: set.name,
-    description: `${set.name} flashcard set`,
+    description: `${set.name} ${set.type} set`,
     link: `/dashboard/study/${encodeURIComponent(set.name)}`
   }));
 
@@ -84,6 +92,7 @@ const StudyPage: React.FC = () => {
                 </button>
               </CardTitle>
               <CardDescription>{item.description}</CardDescription>
+
             </Card>
           )}
         </HoverEffect>

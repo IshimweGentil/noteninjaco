@@ -46,7 +46,7 @@ export async function POST(req: Request) {
         { role: "system", content: systemPrompt },
         { role: "user", content: data },
       ],
-      model: "gpt-4-1106-preview", // Updated to the correct model name
+      model: "gpt-4o-mini", // Updated to the correct model name
       response_format: { type: "json_object" },
     });
 

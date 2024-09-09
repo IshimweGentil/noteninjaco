@@ -13,6 +13,7 @@ import MagicButton from '@/components/ui/MagicButton';
 import { ArrowRight, Loader2 } from 'lucide-react';
 import PreviewModal from '@/components/PreviewModal';
 import SummaryPreviewModal from '@/components/SummaryPreviewModal';
+import FileUploadArea from "@/components/FileUploadArea";
 
 interface Flashcard {
   front: string;
@@ -27,7 +28,7 @@ interface Tab {
 const GeneratePage = () => {
   const [text, setText] = useState("");
   const { isLoaded, isSignedIn, user } = useUser();
-  const [activeTab, setActiveTab] = useState("file");
+  const [activeTab, setActiveTab] = useState("text");
   const [flashcards, setFlashcards] = useState<Flashcard[]>([]);
   const [summary, setSummary] = useState("");
   const [isFlashcardModalOpen, setIsFlashcardModalOpen] = useState(false);
@@ -41,8 +42,8 @@ const GeneratePage = () => {
   }
 
   const tabs: Tab[] = [
-    { id: "file", label: "Files" },
     { id: "text", label: "Text" },
+    // { id: "file", label: "Files" },
     { id: "audio", label: "Audio" },
   ];
 
@@ -155,20 +156,17 @@ const GeneratePage = () => {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <div className="border-b border-slate-700">
+      {/* <div className="border-b border-slate-700">
         <div className="container mx-auto px-4">
           <Tabs tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} />
         </div>
-      </div>
-      <div className="flex-grow container mx-auto px-4 py-6">
-        <h1 className="mb-2">Welcome, {user.firstName || "User"}!</h1>
-        <div className="mt-2">
-          {activeTab === "file" && <FileTab text={text} setText={setText} />}
-          {activeTab === "text" && <TextTab text={text} setText={setText} />}
-          {activeTab === "audio" && <AudioTab text={text} setText={setText} />}
-        </div>
+      </div> */}
+      <div className="flex-grow container mx-auto px-4 py-2">
+        <h1 className="mb-4 font-bold text-xl">Welcome, {user.firstName || "User"}!</h1>
         <div>
-          <div className="flex justify-start space-x-4">
+        <TextTab text={text} setText={setText} AudioTab={AudioTab} />
+        <FileUploadArea setText ={setText} />
+          <div className="flex flex-row justify-start space-x-4">
             <MagicButton
               title={isFlashcardLoading ? "Generating..." : "Generate Flashcards"}
               icon={

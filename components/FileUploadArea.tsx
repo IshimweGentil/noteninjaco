@@ -64,7 +64,7 @@ const FileUploadArea: React.FC<FileUploadAreaProps> = ({ setText }) => {
     <div className="border-gray-600">
       <div
         {...getRootProps()}
-        className="border-2 border-dashed border-gray-600 rounded-lg p-12 text-center cursor-pointer flex items-center justify-center h-64 mb-4"
+        className="border-2 border-dashed border-gray-600 rounded-lg p-12 text-center cursor-pointer flex items-center justify-center h-32 max-w-[500px] mb-4"
       >
         <input {...getInputProps()} />
         <p>{isDragActive ? "Drop the files here..." : "Drag and drop some files here, or click to select files"}</p>

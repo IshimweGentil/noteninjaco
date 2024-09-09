@@ -1,8 +1,7 @@
-// pages/api/[noteAction].ts
-import type { NextApiRequest, NextApiResponse } from 'next';
+import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
 import { Pinecone } from '@pinecone-database/pinecone';
-import { v4 as uuidv4 } from 'uuid'; // UUID for unique ID generation
+import { v4 as uuidv4 } from 'uuid';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -12,80 +11,70 @@ const pc = new Pinecone({
 });
 const pc_index = pc.index('rag');
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  const { noteAction } = req.query;
+export async function POST(request: NextRequest) {
+  const { pathname } = new URL(request.url);
+  const noteAction = pathname.split('/').pop();
 
-  if (req.method === 'POST') {
-    if (typeof noteAction === 'string') {
-      switch (noteAction) {
-        case 'add-notes':
-          try {
-            const { notes, metadata, user_id, project_id } = req.body;
+  if (typeof noteAction === 'string') {
+    switch (noteAction) {
+      case 'add-notes':
+        try {
+          const { notes, metadata, user_id, project_id } = await request.json();
 
-            // generate embeddings for the notes using OpenAI
-            const embeddingResponse = await openai.embeddings.create({
-              input: notes,
-              model: 'text-embedding-3-small',
-            });
-            const embeddings = embeddingResponse.data[0].embedding;
+          const embeddingResponse = await openai.embeddings.create({
+            input: notes,
+            model: 'text-embedding-3-small',
+          });
+          const embeddings = embeddingResponse.data[0].embedding;
 
-            // generate a unique ID for the vector
-            const uniqueId = `${user_id}_${project_id}_${uuidv4()}`;
+          const uniqueId = `${user_id}_${project_id}_${uuidv4()}`;
 
-            const data = {
-              id: uniqueId, // unique identifier
-              values: embeddings,
-              metadata: {
-                project_id, // store project_id in metadata
-                ...metadata,
-              },
-            };
-            // insert embeddings into Pinecone
-            await pc_index.upsert([{ ...data, namespace: "noteninja" }]);
+          const vector = {
+            id: uniqueId,
+            values: embeddings,
+            metadata: {
+              project_id,
+              ...metadata,
+            },
+          };
+          
+          // Remove the namespace from the upsert call
+          await pc_index.upsert([vector]);
 
-            res.status(200).json({ message: 'Notes added successfully' });
-          } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-            res.status(500).json({ error: 'Failed to add notes', details: errorMessage });
-          }
-          break;
+          return NextResponse.json({ message: 'Notes added successfully' }, { status: 200 });
+        } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+          return NextResponse.json({ error: 'Failed to add notes', details: errorMessage }, { status: 500 });
+        }
 
-        case 'query-notes':
-          try {
-            const { query, project_id } = req.body; // include project_id in the request body if needed
+      case 'query-notes':
+        try {
+          const { query, project_id } = await request.json();
 
-            // Generate embeddings for the query using OpenAI
-            const embeddingResponse = await openai.embeddings.create({
-              input: query,
-              model: 'text-embedding-3-small',
-            });
-            const queryEmbedding = embeddingResponse.data[0].embedding;
+          const embeddingResponse = await openai.embeddings.create({
+            input: query,
+            model: 'text-embedding-3-small',
+          });
+          const queryEmbedding = embeddingResponse.data[0].embedding;
 
-            // query Pinecone with metadata filtering
-            const results = await pc_index.query({
-              vector: queryEmbedding,
-              topK: 3, // Number of top results to retrieve
-              includeValues: false, // Optionally include values if needed
-              includeMetadata: true, // Include metadata in results
-              filter: { project_id }, // Filter by project_id
-            });
+          const results = await pc_index.query({
+            vector: queryEmbedding,
+            topK: 3,
+            includeValues: false,
+            includeMetadata: true,
+            filter: { project_id },
+          });
 
-            res.status(200).json({ results });
-          } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-            res.status(500).json({ error: 'Failed to query notes', details: errorMessage });
-          }
-          break;
+          return NextResponse.json({ results }, { status: 200 });
+        } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+          return NextResponse.json({ error: 'Failed to query notes', details: errorMessage }, { status: 500 });
+        }
 
-        default:
-          res.status(404).json({ error: 'Action not found' });
-          break;
-      }
-    } else {
-      res.status(400).json({ error: 'Invalid action' });
+      default:
+        return NextResponse.json({ error: 'Action not found' }, { status: 404 });
     }
   } else {
-    res.setHeader('Allow', ['POST']);
-    res.status(405).end(`Method ${req.method} Not Allowed`);
+    return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
   }
 }

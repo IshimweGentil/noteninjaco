@@ -54,7 +54,8 @@
     "tesseract.js": "^5.1.1",
     "three": "^0.168.0",
     "uuid": "^10.0.0",
-    "vercel": "^37.3.0"
+    "vercel": "^37.3.0",
+    "web-streams-polyfill": "^4.0.0"
   },
   "devDependencies": {
     "@iconify-icons/mingcute": "^1.2.9",

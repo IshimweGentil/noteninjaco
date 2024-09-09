@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useUser } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 import { db } from '@/firebase';
-import { collection, doc, getDoc, setDoc, updateDoc, arrayRemove } from 'firebase/firestore';
+import { collection, doc, getDoc, setDoc, deleteDoc, getDocs, writeBatch } from 'firebase/firestore';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import { HoverEffect, Card, CardTitle, CardDescription } from '@/components/ui/card-hover-effect';
 import { Trash2 } from 'lucide-react';
@@ -38,11 +38,45 @@ const StudyPage: React.FC = () => {
 
   const handleDelete = async (setName: string) => {
     if (!user) return;
-    const docRef = doc(collection(db, 'users'), user.id);
-    await updateDoc(docRef, {
-      flashcards: arrayRemove({ name: setName })
-    });
-    setFlashcardSets(prev => prev.filter(set => set.name !== setName));
+  
+    const userDocRef = doc(collection(db, 'users'), user.id);
+    const flashcardCollectionRef = collection(db, `users/${user.id}/${setName}`);
+  
+    try {
+      // Get all flashcard documents in the sub-collection
+      const flashcardDocs = await getDocs(flashcardCollectionRef);
+  
+      if (!flashcardDocs.empty) {
+        // Create a batch to delete all flashcards in the collection
+        const batch = writeBatch(db);
+  
+        flashcardDocs.forEach((doc) => {
+          batch.delete(doc.ref);
+        });
+  
+        // Commit the batch delete of flashcards
+        await batch.commit();
+      }
+  
+      // Now remove the flashcard set entry from the user's flashcards array
+      const userDocSnap = await getDoc(userDocRef);
+      if (userDocSnap.exists()) {
+        const collections = userDocSnap.data().flashcards || [];
+        const updatedCollections = collections.filter((set: any) => set.name !== setName);
+  
+        // Update the user document with the modified flashcards array
+        await setDoc(userDocRef, { flashcards: updatedCollections }, { merge: true });
+      }
+  
+      // Optionally, remove the empty collection
+      const flashcardSetDocRef = doc(db, `users/${user.id}/flashcardSets`, setName);
+      await deleteDoc(flashcardSetDocRef);
+  
+      // Update local state
+      setFlashcardSets((prev) => prev.filter((set) => set.name !== setName));
+    } catch (error) {
+      console.error('Error deleting flashcard set:', error);
+    }
   };
 
   if (!isLoaded || !isSignedIn) {
@@ -61,13 +95,13 @@ const StudyPage: React.FC = () => {
 
   return (
     <div className="container mx-auto px-4 py-8 text-center">
-      <h1 className="text-2xl ">Your Flashcard Sets</h1>
+      <h1 className="text-2xl">Your Flashcard Sets</h1>
       {flashcardSets.length === 0 ? (
         <p>You don&apos;t have any saved flashcard sets yet.</p>
       ) : (
         <HoverEffect items={hoverEffectItems} isLink={true}>
           {(item, index) => (
-            <Card>
+            <Card key={index}>
               <CardTitle className="flex justify-between items-center">
                 <span>{item.title}</span>
                 <button

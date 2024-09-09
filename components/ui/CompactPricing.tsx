@@ -1,5 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
+import Link from 'next/link';
 import { CardSpotlight } from './card-spotlight';
+import NotAvailablePopup from './NotAvailablePopup';
 
 interface PricingFeature {
   text: string;
@@ -9,13 +11,15 @@ interface PricingPlan {
   title: string;
   price: string;
   features: PricingFeature[];
+  action: 'signup' | 'unavailable';
 }
 
-interface CompactPricingCardProps {
+interface PricingCardProps {
   plan: PricingPlan;
+  onAction: (action: 'signup' | 'unavailable') => void;
 }
 
-const CompactPricingCard: React.FC<CompactPricingCardProps> = ({ plan }) => (
+const PricingCard: React.FC<PricingCardProps> = ({ plan, onAction }) => (
   <CardSpotlight className="w-full mx-auto p-2 sm:p-4">
     <div className="flex justify-between items-center mb-1 sm:mb-2 relative z-20 ">
       <h3 className="text-base sm:text-lg font-bold text-white">{plan.title}</h3>
@@ -29,11 +33,32 @@ const CompactPricingCard: React.FC<CompactPricingCardProps> = ({ plan }) => (
         </li>
       ))}
     </ul>
-    <button className="bg-slate-400 text-slate-950 px-2 sm:px-3 py-1 sm:py-1.5 rounded-full hover:bg-slate-500 transition duration-300 w-full relative z-20 text-xs sm:text-sm">Choose Plan</button>
+    {plan.action === 'signup' ? (
+      <Link href="/sign-up" className="block w-full">
+        <button className="bg-purple-600 hover:bg-purple-700 text-white px-2 sm:px-3 py-1 sm:py-1.5 rounded-full transition duration-300 w-full relative z-20 text-xs sm:text-sm">
+          Sign Up
+        </button>
+      </Link>
+    ) : (
+      <button 
+        className="bg-purple-600 hover:bg-purple-700 text-white px-2 sm:px-3 py-1 sm:py-1.5 rounded-full transition duration-300 w-full relative z-20 text-xs sm:text-sm"
+        onClick={() => onAction('unavailable')}
+      >
+        Choose Plan
+      </button>
+    )}
   </CardSpotlight>
 );
 
 const CompactPricing: React.FC = () => {
+  const [showPopup, setShowPopup] = useState(false);
+
+  const handleAction = (action: 'signup' | 'unavailable') => {
+    if (action === 'unavailable') {
+      setShowPopup(true);
+    }
+  };
+
   const plans: PricingPlan[] = [
     {
       title: "Free",
@@ -42,7 +67,8 @@ const CompactPricing: React.FC = () => {
         { text: "Basic note conversion" },
         { text: "Limited flashcards" },
         { text: "Standard support" }
-      ]
+      ],
+      action: 'signup'
     },
     {
       title: "Pro",
@@ -51,15 +77,19 @@ const CompactPricing: React.FC = () => {
         { text: "Unlimited note conversion" },
         { text: "Advanced flashcard features" },
         { text: "Priority support" }
-      ]
+      ],
+      action: 'unavailable'
     }
   ];
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4">
-      {plans.map((plan, index) => (
-        <CompactPricingCard key={index} plan={plan} />
-      ))}
+    <div className="relative">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4">
+        {plans.map((plan, index) => (
+          <PricingCard key={index} plan={plan} onAction={handleAction} />
+        ))}
+      </div>
+      <NotAvailablePopup isOpen={showPopup} onClose={() => setShowPopup(false)} />
     </div>
   );
 };

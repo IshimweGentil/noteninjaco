@@ -17,9 +17,9 @@ const MagicButton = ({
 }) => {
   return (
     <button
-      className={`relative inline-flex h-12 w-60 overflow-hidden rounded-lg p-[1px] focus:outline-none ${
+      className={`relative inline-flex h-12 w-full sm:w-60 overflow-hidden rounded-lg p-[1px] focus:outline-none ${
         disabled ? 'opacity-50 cursor-not-allowed' : ''
-      }`}
+      } ${otherClasses}`}
       onClick={onClick}
       disabled={disabled}
     >
@@ -29,7 +29,7 @@ const MagicButton = ({
 
       <span
         className={`inline-flex h-full w-full cursor-pointer items-center justify-center rounded-lg
-             bg-slate-950 px-7 text-sm font-medium text-white backdrop-blur-3xl gap-2 ${otherClasses} ${
+             bg-slate-950 px-3 sm:px-7 text-sm font-medium text-white backdrop-blur-3xl gap-2 ${
                disabled ? 'cursor-not-allowed' : ''
              }`}
       >

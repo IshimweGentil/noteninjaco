@@ -64,20 +64,20 @@ const FileUploadArea: React.FC<FileUploadAreaProps> = ({ setText }) => {
     <div className="border-gray-600">
       <div
         {...getRootProps()}
-        className="border-2 border-dashed border-gray-600 rounded-lg p-12 text-center cursor-pointer flex items-center justify-center h-32 max-w-[500px] mb-4"
+        className="border-2 border-dashed border-gray-600 rounded-lg p-4 sm:p-12 text-center cursor-pointer flex items-center justify-center h-24 sm:h-32 w-full max-w-[500px] mb-4"
       >
         <input {...getInputProps()} />
-        <p>{isDragActive ? "Drop the files here..." : "Drag and drop some files here, or click to select files"}</p>
+        <p className="text-sm sm:text-base">{isDragActive ? "Drop the files here..." : "Drag and drop files here, or tap to select"}</p>
       </div>
 
       {error && (
-        <div className="text-red-500 mt-2">
+        <div className="text-red-500 mt-2 text-sm">
           {error}
         </div>
       )}
 
       {message && (
-        <div className="text-green-500 mt-2">
+        <div className="text-green-500 mt-2 text-sm">
           {message}
         </div>
       )}
@@ -85,13 +85,13 @@ const FileUploadArea: React.FC<FileUploadAreaProps> = ({ setText }) => {
       {files.length > 0 && (
         <>
           <button
-            className="flex mb-2 mt-4 cursor-pointer border rounded-lg py-1 px-2 border-white hover:opacity-70"
+            className="flex mb-2 mt-4 cursor-pointer border rounded-lg py-1 px-2 border-white hover:opacity-70 text-sm"
             onClick={(e) => {
               e.preventDefault();
               setFiles([]);
             }}
           >
-            <IconClearAll />
+            <IconClearAll size={16} />
             <span className="ml-2">Clear All</span>
           </button>
           <ul className="flex flex-col border border-gray-500 rounded-lg overflow-hidden">
@@ -100,9 +100,10 @@ const FileUploadArea: React.FC<FileUploadAreaProps> = ({ setText }) => {
                 key={`${file.name}-${index}`}
                 className="flex justify-between items-center border-b border-gray-500 last:border-b-0 p-2"
               >
-                <p>{file.name}</p>
+                <p className="text-sm truncate">{file.name}</p>
                 <IconFileX
                   className="cursor-pointer hover:scale-105 hover:opacity-70"
+                  size={16}
                   onClick={(e) => {
                     e.stopPropagation();
                     setFiles((files) =>
@@ -114,7 +115,7 @@ const FileUploadArea: React.FC<FileUploadAreaProps> = ({ setText }) => {
             ))}
           </ul>
           <button
-            className="mt-4 mb-4 cursor-pointer bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 disabled:opacity-50"
+            className="mt-4 mb-4 cursor-pointer bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 disabled:opacity-50 text-sm w-full sm:w-auto"
             onClick={handleFiles}
             disabled={isLoading}
           >

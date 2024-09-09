@@ -2,8 +2,6 @@
 
 import React, { useState } from "react";
 import { useUser } from "@clerk/nextjs";
-import Tabs from "@/components/Tabs";
-import FileTab from "@/components/FileTab";
 import TextTab from "@/components/TextTab";
 import AudioTab from "@/components/AudioTab";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
@@ -40,12 +38,6 @@ const GeneratePage = () => {
   if (!isLoaded || !isSignedIn) {
     return <LoadingSpinner />;
   }
-
-  const tabs: Tab[] = [
-    { id: "text", label: "Text" },
-    // { id: "file", label: "Files" },
-    { id: "audio", label: "Audio" },
-  ];
 
   const generateFlashcards = async () => {
     if (text.trim() === '') return;
@@ -111,62 +103,59 @@ const GeneratePage = () => {
   };
 
   const handleSave = async (name: string, type: "flashcards" | "summary") => {
-  if (!user) {
-    console.error('User not authenticated');
-    return;
-  }
-
-  const batch = writeBatch(db);
-  const userDocRef = doc(collection(db, 'users'), user.id);
-  const docSnap = await getDoc(userDocRef);
-
-  if (docSnap.exists()) {
-    const collections = docSnap.data().flashcards || [];
-    if (collections.find((f: any) => f.name === name)) {
-      alert('Set name already exists');
+    if (!user) {
+      console.error('User not authenticated');
       return;
-    } else {
-      collections.push({ name, type });
-      batch.set(userDocRef, { flashcards: collections }, { merge: true });
     }
-  } else {
-    batch.set(userDocRef, { flashcards: [{ name, type }] });
-  }
 
-  const colRef = collection(userDocRef, name);
-  if (type === "flashcards") {
-    flashcards.forEach((flashcard: Flashcard) => {
-      const cardDocRef = doc(colRef);
-      batch.set(cardDocRef, flashcard);
-    });
-  } else {
-    const summaryDocRef = doc(colRef, 'summary');
-    batch.set(summaryDocRef, { content: summary });  // Save the summary as-is
-  }
+    const batch = writeBatch(db);
+    const userDocRef = doc(collection(db, 'users'), user.id);
+    const docSnap = await getDoc(userDocRef);
 
-  try {
-    await batch.commit();
-    console.log(`${type} saved successfully`);
-    setIsFlashcardModalOpen(false);
-  } catch (error) {
-    console.error(`Error saving ${type}:`, error);
-    setError(error instanceof Error ? error.message : 'An unknown error occurred while saving');
-  }
-};
+    if (docSnap.exists()) {
+      const collections = docSnap.data().flashcards || [];
+      if (collections.find((f: any) => f.name === name)) {
+        alert('Set name already exists');
+        return;
+      } else {
+        collections.push({ name, type });
+        batch.set(userDocRef, { flashcards: collections }, { merge: true });
+      }
+    } else {
+      batch.set(userDocRef, { flashcards: [{ name, type }] });
+    }
+
+    const colRef = collection(userDocRef, name);
+    if (type === "flashcards") {
+      flashcards.forEach((flashcard: Flashcard) => {
+        const cardDocRef = doc(colRef);
+        batch.set(cardDocRef, flashcard);
+      });
+    } else {
+      const summaryDocRef = doc(colRef, 'summary');
+      batch.set(summaryDocRef, { content: summary });
+    }
+
+    try {
+      await batch.commit();
+      console.log(`${type} saved successfully`);
+      setIsFlashcardModalOpen(false);
+    } catch (error) {
+      console.error(`Error saving ${type}:`, error);
+      setError(error instanceof Error ? error.message : 'An unknown error occurred while saving');
+    }
+  };
 
   return (
     <div className="flex flex-col min-h-screen">
-      {/* <div className="border-b border-slate-700">
-        <div className="container mx-auto px-4">
-          <Tabs tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} />
-        </div>
-      </div> */}
       <div className="flex-grow container mx-auto px-4 py-2">
         <h1 className="mb-4 font-bold text-xl">Welcome, {user.firstName || "User"}!</h1>
         <div>
-        <TextTab text={text} setText={setText} AudioTab={AudioTab} />
-        <FileUploadArea setText ={setText} />
-          <div className="flex flex-row justify-start space-x-4">
+          <TextTab text={text} setText={setText} AudioTab={AudioTab} />
+          <div className="mt-4">
+            <FileUploadArea setText={setText} />
+          </div>
+          <div className="flex flex-col sm:flex-row justify-start space-y-2 sm:space-y-0 sm:space-x-4 mt-4">
             <MagicButton
               title={isFlashcardLoading ? "Generating..." : "Generate Flashcards"}
               icon={
@@ -179,6 +168,7 @@ const GeneratePage = () => {
               position="right"
               onClick={generateFlashcards}
               disabled={isFlashcardLoading || isSummaryLoading || text.trim() === ""}
+              otherClasses="w-full sm:w-auto"
             />
             <MagicButton
               title={isSummaryLoading ? "Generating..." : "Generate Summary"}
@@ -192,6 +182,7 @@ const GeneratePage = () => {
               position="right"
               onClick={generateSummary}
               disabled={isFlashcardLoading || isSummaryLoading || text.trim() === ""}
+              otherClasses="w-full sm:w-auto"
             />
           </div>
 

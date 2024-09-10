@@ -35,7 +35,8 @@ const NotAvailablePopup: React.FC<NotAvailablePopupProps> = ({ isOpen, onClose }
               <FaTimes size={20} />
             </button>
             <h3 className="text-xl font-bold text-white mb-4">Not Available Yet</h3>
-            <p className="text-gray-300 mb-4">The Pro plan is not available yet. Please check back later!</p>
+            <p className="text-gray-300 mb-4">Exciting updates are on the way! Our premium features are coming soon,
+                                                 and we can’t wait to share them with you. Stay tuned for more</p>
             <button 
               onClick={onClose}
               className="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 transition duration-300"

@@ -8,6 +8,9 @@ import { collection, doc, getDocs, getDoc } from 'firebase/firestore';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import BackIcon from '@/components/ui/BackIcon';
 import { HoverEffect, Card, CardTitle, CardDescription } from '@/components/ui/card-hover-effect';
+import { ProjectChat } from '@/components/ProjectChat';
+import ChatButton from '@/components/ChatButton';
+
 
 interface Tab {
   id: string;
@@ -60,6 +63,7 @@ const StudySetPage = () => {
   const [activeTab, setActiveTab] = useState('single');
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const [setType, setSetType] = useState<'flashcards' | 'summary'>('flashcards');
+  const [isChatVisible, setIsChatVisible] = useState(false);
 
   useEffect(() => {
     async function getStudySet() {
@@ -90,6 +94,14 @@ const StudySetPage = () => {
     }
     getStudySet();
   }, [user, setName]);
+
+  const toggleVisibility = useCallback(() => {
+    setIsChatVisible(prevState => !prevState);
+  }, []);
+
+  const closeChat = useCallback(() => {
+    setIsChatVisible(false);
+  }, []);
 
   const handleCardClick = useCallback((id: string) => {
     setFlipped(prev => ({ ...prev, [id]: !prev[id] }));
@@ -229,6 +241,8 @@ const StudySetPage = () => {
 
   return (
     <div className="container mx-auto px-4">
+      <ChatButton onClick={toggleVisibility} isVisible={isChatVisible} />
+      {isChatVisible && <ProjectChat isVisible={isChatVisible} setIsVisible={setIsChatVisible} closeChat={closeChat} />}
       {setType === 'flashcards' && (
         <div className="mb-2">
           <Tabs tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} />

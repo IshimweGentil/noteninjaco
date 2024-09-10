@@ -14,20 +14,20 @@ interface ChatProps {
   isVisible?: boolean;
   setIsVisible?: (isVisible: boolean) => void;
   closeChat?: () => void;
+  className?: string;
 }
-
 interface Message {
   id: string;
   role: "function" | "assistant" | "system" | "user" | "data" | "tool";
   content: string;
 }
 
-export function ProjectChat({ isVisible, setIsVisible, closeChat }: ChatProps) {
+export function ProjectChat({ className, isVisible, setIsVisible, closeChat }: ChatProps) {
   const [persistentMessages, setPersistentMessages] = useState<Message[]>([
     {
       id: "1",
       role: "assistant",
-      content: "Hello! I am the AI Customer Support Agent at NoteNinja. How can I assist you today?",
+      content: "Hello! I am the Project Chatbot. How can I assist you today?",
     },
   ]);
 
@@ -105,7 +105,7 @@ export function ProjectChat({ isVisible, setIsVisible, closeChat }: ChatProps) {
   return (
     <div
       ref={chatRef}
-      className={`fixed bottom-0 right-0 mb-4 mr-4 w-11/12 sm:w-3/4 md:w-2/3 lg:w-1/2 xl:w-1/3 max-w-md bg-slate-800/30 border border-slate-600 backdrop-blur-md rounded-lg shadow-lg overflow-hidden z-50 transition-all duration-500 ease-in-out ${
+      className={`fixed bottom-0 right-0 mb-4 mr-4 w-11/12 sm:w-3/4 md:w-2/3 lg:w-1/2 xl:w-1/3 max-w-md bg-slate-800/30 border border-slate-600 backdrop-blur-md rounded-lg shadow-lg overflow-hidden z-50 transition-all duration-500 ease-in-out ${className} ${
         isVisible
           ? 'opacity-100 translate-y-0'
           : 'opacity-0 translate-y-full pointer-events-none'

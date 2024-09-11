@@ -37,6 +37,7 @@ const GeneratePage = () => {
   const [isSummaryModalOpen, setIsSummaryModalOpen] = useState(false);
   const [isFlashcardLoading, setIsFlashcardLoading] = useState(false);
   const [isSummaryLoading, setIsSummaryLoading] = useState(false);
+  const [projectTitle, setProjectTitle] = useState('')
   const [error, setError] = useState<string | null>(null);
   const [projectNames, setProjectNames] = useState<string[]>([])
 
@@ -138,10 +139,13 @@ const GeneratePage = () => {
       return;
     }
 
+    setProjectTitle(name);
+
     const batch = writeBatch(db);
     const userDocRef = doc(collection(db, "users"), user.id);
     const docSnap = await getDoc(userDocRef);
 
+    // create/merge flashcards
     if (docSnap.exists()) {
       const collections = docSnap.data().flashcards || [];
       collections.push({ name, type });
@@ -150,6 +154,7 @@ const GeneratePage = () => {
       batch.set(userDocRef, { flashcards: [{ name, type }] });
     }
 
+    // save flashcards/summary
     const colRef = collection(userDocRef, name);
     if (type === "flashcards") {
       flashcards.forEach((flashcard: Flashcard) => {
@@ -162,7 +167,7 @@ const GeneratePage = () => {
     }
 
     try {
-      await batch.commit();
+      await batch.commit(); // commit changes
       setIsFlashcardModalOpen(false);
       // await addNotesToPinecone({ user_id: user.id, project_id: projectTitle, text }); // add notes to pinecone
       console.log("saved notes into pinecone"); // TEST

@@ -37,7 +37,6 @@ const GeneratePage = () => {
   const [isSummaryModalOpen, setIsSummaryModalOpen] = useState(false);
   const [isFlashcardLoading, setIsFlashcardLoading] = useState(false);
   const [isSummaryLoading, setIsSummaryLoading] = useState(false);
-  const [projectTitle, setProjectTitle] = useState('')
   const [error, setError] = useState<string | null>(null);
   const [projectNames, setProjectNames] = useState<string[]>([])
 
@@ -151,7 +150,6 @@ const GeneratePage = () => {
       batch.set(userDocRef, { flashcards: [{ name, type }] });
     }
 
-    setProjectTitle(name);
     const colRef = collection(userDocRef, name);
     if (type === "flashcards") {
       flashcards.forEach((flashcard: Flashcard) => {

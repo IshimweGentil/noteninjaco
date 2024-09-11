@@ -3,6 +3,7 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import OpenAI from 'openai';
 import { Pinecone } from '@pinecone-database/pinecone';
 import { v4 as uuidv4 } from 'uuid'; // UUID for unique ID generation
+import { createStream } from "@/lib/streamUtil";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -20,27 +21,37 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       switch (noteAction) {
         case 'add-notes':
           try {
-            const { notes, metadata, user_id, project_id } = req.body;
+            const { notes, user_id, project_id } = req.body;
 
-            // generate embeddings for the notes using OpenAI
+            // Generate summary and key topics
+            const summaryResponse = await openai.completions.create({
+              prompt: `Summarize the following notes and extract key topics and key details: ${notes}`,
+              model: 'gpt-4o-mini',
+              max_tokens: 150,
+            });
+            const summary = summaryResponse.choices[0].text.trim();
+
+            // Generate embeddings for the summary
             const embeddingResponse = await openai.embeddings.create({
-              input: notes,
+              input: summary,
               model: 'text-embedding-3-small',
+              encoding_format: 'float',
             });
             const embeddings = embeddingResponse.data[0].embedding;
 
-            // generate a unique ID for the vector
-            const uniqueId = `${user_id}_${project_id}_${uuidv4()}`;
+            // Generate a unique ID for the vector
+            const uniqueId = `${user_id}-${project_id}-${uuidv4()}`;
 
             const data = {
-              id: uniqueId, // unique identifier
+              id: uniqueId,
               values: embeddings,
               metadata: {
-                project_id, // store project_id in metadata
-                ...metadata,
+                project_id,
+                summary,
               },
             };
-            // insert embeddings into Pinecone
+
+            // Insert embeddings into Pinecone
             await pc_index.upsert([{ ...data, namespace: "noteninja" }]);
 
             res.status(200).json({ message: 'Notes added successfully' });
@@ -52,25 +63,46 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
         case 'query-notes':
           try {
-            const { query, project_id } = req.body; // include project_id in the request body if needed
+            const { data, project_id } = req.body;
+            const latestUserMessage = data[data.length - 1].content;
 
-            // Generate embeddings for the query using OpenAI
+            // Generate embeddings for the user query
             const embeddingResponse = await openai.embeddings.create({
-              input: query,
+              input: latestUserMessage,
               model: 'text-embedding-3-small',
+              encoding_format: 'float',
             });
             const queryEmbedding = embeddingResponse.data[0].embedding;
 
-            // query Pinecone with metadata filtering
+            // Query Pinecone with metadata filtering
             const results = await pc_index.query({
               vector: queryEmbedding,
-              topK: 3, // Number of top results to retrieve
-              includeValues: false, // Optionally include values if needed
-              includeMetadata: true, // Include metadata in results
-              filter: { project_id }, // Filter by project_id
+              topK: 2,
+              includeValues: false,
+              includeMetadata: true,
+              filter: { project_id },
             });
 
-            res.status(200).json({ results });
+            // Create result string
+            let resultString = 'Returned results from vector db:\n';
+            results.matches.forEach((match: any) => {
+              resultString += `Project ID: ${match.metadata.project_id}\nSummary: ${match.metadata.summary}\n\n`;
+            });
+
+            // Generate chat completion
+            const lastMessageContent = latestUserMessage + '\n\n' + resultString;
+            const lastDataWithoutLastMessage = data.slice(0, -1);
+            const completion = await openai.chat.completions.create({
+              model: 'gpt-4o-mini',
+              messages: [
+                { role: 'system', content: 'You are a helpful assistant.' },
+                ...lastDataWithoutLastMessage,
+                { role: 'user', content: lastMessageContent }
+              ],
+              stream: true,
+            });
+
+            res.status(200).json(createStream(completion));
           } catch (error) {
             const errorMessage = error instanceof Error ? error.message : 'Unknown error';
             res.status(500).json({ error: 'Failed to query notes', details: errorMessage });

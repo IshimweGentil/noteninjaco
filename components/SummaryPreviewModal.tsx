@@ -11,6 +11,7 @@ interface SummaryPreviewModalProps {
   onSave: (name: string) => void;
   onRegenerate: () => void;
   isLoading: boolean;
+  projectNames?: string[];
 }
 
 const SummaryPreviewModal: React.FC<SummaryPreviewModalProps> = ({
@@ -21,13 +22,10 @@ const SummaryPreviewModal: React.FC<SummaryPreviewModalProps> = ({
   onSave,
   onRegenerate,
   isLoading,
+  projectNames = [],
 }) => {
   const [name, setName] = useState('');
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
-
-  useEffect(() => {
-    console.log("Summary in modal:", summary); // Debug log
-  }, [summary]);
 
   if (!isOpen) return null;
 
@@ -109,11 +107,17 @@ const SummaryPreviewModal: React.FC<SummaryPreviewModalProps> = ({
             <div className="mb-4">
               <input
                 type="text"
+                list="project"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Enter summary name"
                 className="w-full px-3 py-2 bg-slate-800 text-blue-100 border border-slate-700 rounded focus:outline-none focus:border-blue-500"
               />
+              <datalist id="project">
+                {projectNames && projectNames.map((name:string) => (
+                  <option key={name} value={name} />
+                ))}
+              </datalist>
             </div>
 
             <div className="flex justify-end space-x-2">

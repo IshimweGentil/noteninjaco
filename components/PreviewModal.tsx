@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { XIcon, ArrowRight, Loader2, CheckCircle } from 'lucide-react';
 import { motion, AnimatePresence } from "framer-motion";
 import MagicButton from './ui/MagicButton';
+
 
 interface PreviewItem {
   front: string;
@@ -16,6 +17,7 @@ interface PreviewModalProps {
   onRegenerate: () => void;
   isLoading: boolean;
   title?: string;
+  projectNames?: string[];
 }
 
 const PreviewModal: React.FC<PreviewModalProps> = ({
@@ -26,6 +28,7 @@ const PreviewModal: React.FC<PreviewModalProps> = ({
   onRegenerate,
   isLoading,
   title = 'Preview',
+  projectNames= []
 }) => {
   const [name, setName] = useState('');
   const [currentIndex, setCurrentIndex] = useState(0);

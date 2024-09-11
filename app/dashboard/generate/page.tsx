@@ -1,18 +1,21 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useUser } from "@clerk/nextjs";
 import Tabs from "@/components/Tabs";
 import FileTab from "@/components/FileTab";
 import TextTab from "@/components/TextTab";
 import AudioTab from "@/components/AudioTab";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
-import { db } from '@/firebase';
-import { writeBatch, doc, getDoc, collection } from 'firebase/firestore';
-import MagicButton from '@/components/ui/MagicButton';
-import { ArrowRight, Loader2 } from 'lucide-react';
-import PreviewModal from '@/components/PreviewModal';
-import SummaryPreviewModal from '@/components/SummaryPreviewModal';
+import { db } from "@/firebase";
+import { writeBatch, doc, getDoc, collection } from "firebase/firestore";
+import MagicButton from "@/components/ui/MagicButton";
+import { ArrowRight, Loader2 } from "lucide-react";
+import PreviewModal from "@/components/PreviewModal";
+import SummaryPreviewModal from "@/components/SummaryPreviewModal";
+import { getProjectNames } from '@/lib/firebaseUtil';
+import { addNotesToPinecone } from "@/lib/pineconeUtil";
+
 
 interface Flashcard {
   front: string;
@@ -34,7 +37,24 @@ const GeneratePage = () => {
   const [isSummaryModalOpen, setIsSummaryModalOpen] = useState(false);
   const [isFlashcardLoading, setIsFlashcardLoading] = useState(false);
   const [isSummaryLoading, setIsSummaryLoading] = useState(false);
+  const [projectTitle, setProjectTitle] = useState('')
   const [error, setError] = useState<string | null>(null);
+  const [projectNames, setProjectNames] = useState<string[]>([])
+
+
+  useEffect(() => {
+    const getNames = async () => {
+      try {
+        if (user) {
+          const names = await getProjectNames(user.id);
+          setProjectNames(names);
+        }
+      } catch (error) {
+        console.error("Error fetching project names:", error);
+      }
+    }
+    getNames();
+  }, []);
 
   if (!isLoaded || !isSignedIn) {
     return <LoadingSpinner />;
@@ -47,17 +67,17 @@ const GeneratePage = () => {
   ];
 
   const generateFlashcards = async () => {
-    if (text.trim() === '') return;
+    if (text.trim() === "") return;
     setIsFlashcardLoading(true);
     setError(null);
     console.log("Generating: flashcards");
 
     try {
-      const response = await fetch('/api/generate', {
-        method: 'POST',
+      const response = await fetch("/api/generate", {
+        method: "POST",
         body: JSON.stringify({ text }),
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
       });
       if (!response.ok) {
@@ -69,7 +89,9 @@ const GeneratePage = () => {
       setIsFlashcardModalOpen(true);
     } catch (error) {
       console.error("Error generating flashcards:", error);
-      setError(error instanceof Error ? error.message : 'An unknown error occurred');
+      setError(
+        error instanceof Error ? error.message : "An unknown error occurred"
+      );
       setFlashcards([]);
     } finally {
       setIsFlashcardLoading(false);
@@ -77,17 +99,17 @@ const GeneratePage = () => {
   };
 
   const generateSummary = async () => {
-    if (text.trim() === '') return;
+    if (text.trim() === "") return;
     setIsSummaryLoading(true);
     setError(null);
     console.log("Generating: summary");
 
     try {
-      const response = await fetch('/api/summarize', {
-        method: 'POST',
+      const response = await fetch("/api/summarize", {
+        method: "POST",
         body: JSON.stringify({ text }),
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
       });
       if (!response.ok) {
@@ -102,7 +124,9 @@ const GeneratePage = () => {
       setIsSummaryModalOpen(true);
     } catch (error) {
       console.error("Error generating summary:", error);
-      setError(error instanceof Error ? error.message : 'An unknown error occurred');
+      setError(
+        error instanceof Error ? error.message : "An unknown error occurred"
+      );
       setSummary("");
     } finally {
       setIsSummaryLoading(false);
@@ -110,48 +134,49 @@ const GeneratePage = () => {
   };
 
   const handleSave = async (name: string, type: "flashcards" | "summary") => {
-  if (!user) {
-    console.error('User not authenticated');
-    return;
-  }
-
-  const batch = writeBatch(db);
-  const userDocRef = doc(collection(db, 'users'), user.id);
-  const docSnap = await getDoc(userDocRef);
-
-  if (docSnap.exists()) {
-    const collections = docSnap.data().flashcards || [];
-    if (collections.find((f: any) => f.name === name)) {
-      alert('Set name already exists');
+    if (!user) {
+      console.error("User not authenticated");
       return;
-    } else {
+    }
+
+    const batch = writeBatch(db);
+    const userDocRef = doc(collection(db, "users"), user.id);
+    const docSnap = await getDoc(userDocRef);
+
+    if (docSnap.exists()) {
+      const collections = docSnap.data().flashcards || [];
       collections.push({ name, type });
       batch.set(userDocRef, { flashcards: collections }, { merge: true });
+    } else {
+      batch.set(userDocRef, { flashcards: [{ name, type }] });
     }
-  } else {
-    batch.set(userDocRef, { flashcards: [{ name, type }] });
-  }
 
-  const colRef = collection(userDocRef, name);
-  if (type === "flashcards") {
-    flashcards.forEach((flashcard: Flashcard) => {
-      const cardDocRef = doc(colRef);
-      batch.set(cardDocRef, flashcard);
-    });
-  } else {
-    const summaryDocRef = doc(colRef, 'summary');
-    batch.set(summaryDocRef, { content: summary });  // Save the summary as-is
-  }
+    setProjectTitle(name);
+    const colRef = collection(userDocRef, name);
+    if (type === "flashcards") {
+      flashcards.forEach((flashcard: Flashcard) => {
+        const cardDocRef = doc(colRef);
+        batch.set(cardDocRef, flashcard);
+      });
+    } else {
+      const summaryDocRef = doc(colRef, "summary");
+      batch.set(summaryDocRef, { content: summary }); // Save the summary as-is
+    }
 
-  try {
-    await batch.commit();
-    console.log(`${type} saved successfully`);
-    setIsFlashcardModalOpen(false);
-  } catch (error) {
-    console.error(`Error saving ${type}:`, error);
-    setError(error instanceof Error ? error.message : 'An unknown error occurred while saving');
-  }
-};
+    try {
+      await batch.commit();
+      setIsFlashcardModalOpen(false);
+      // await addNotesToPinecone({ user_id: user.id, project_id: projectTitle, text }); // add notes to pinecone
+      console.log("saved notes into pinecone"); // TEST
+    } catch (error) {
+      console.error(`Error saving ${type}:`, error);
+      setError(
+        error instanceof Error
+          ? error.message
+          : "An unknown error occurred while saving"
+      );
+    }
+  };
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -170,7 +195,9 @@ const GeneratePage = () => {
         <div>
           <div className="flex justify-start space-x-4">
             <MagicButton
-              title={isFlashcardLoading ? "Generating..." : "Generate Flashcards"}
+              title={
+                isFlashcardLoading ? "Generating..." : "Generate Flashcards"
+              }
               icon={
                 isFlashcardLoading ? (
                   <Loader2 className="animate-spin" size={16} />
@@ -180,7 +207,9 @@ const GeneratePage = () => {
               }
               position="right"
               onClick={generateFlashcards}
-              disabled={isFlashcardLoading || isSummaryLoading || text.trim() === ""}
+              disabled={
+                isFlashcardLoading || isSummaryLoading || text.trim() === ""
+              }
             />
             <MagicButton
               title={isSummaryLoading ? "Generating..." : "Generate Summary"}
@@ -193,7 +222,9 @@ const GeneratePage = () => {
               }
               position="right"
               onClick={generateSummary}
-              disabled={isFlashcardLoading || isSummaryLoading || text.trim() === ""}
+              disabled={
+                isFlashcardLoading || isSummaryLoading || text.trim() === ""
+              }
             />
           </div>
 
@@ -205,6 +236,7 @@ const GeneratePage = () => {
             onRegenerate={generateFlashcards}
             isLoading={isFlashcardLoading}
             title="Flashcard Preview"
+            projectNames={projectNames}
           />
 
           <SummaryPreviewModal
@@ -215,6 +247,7 @@ const GeneratePage = () => {
             onSave={(name) => handleSave(name, "summary")}
             onRegenerate={generateSummary}
             isLoading={isSummaryLoading}
+            projectNames={projectNames}
           />
         </div>
       </div>

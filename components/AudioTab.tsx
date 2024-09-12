@@ -75,7 +75,7 @@ const AudioTab: React.FC<AudioTabProps> = ({ text, setText, className }) => {
       {isRecording ? (
         <IconPlayerPause className="bg-green-400 hover:bg-red-400 border rounded-full border-black p-2 w-[3rem] h-[3rem]" />
       ) : (
-        <IconMicrophone className="hover:bg-[#d6d6d6] border rounded-full bg-[rgba(204,204,204,0.3)] p-2 w-[3rem] h-[3rem]" />
+        <IconMicrophone className="hover:bg-slate-900 border border-slate-500 rounded-full bg-slate-950/50 backdrop-blur-md p-2 w-[3rem] h-[3rem]" />
       )}
     </button>
   );

@@ -140,12 +140,18 @@ const PreviewModal: React.FC<PreviewModalProps> = ({
 
             <div className="mb-4">
               <input
+                list="projects"
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Enter set name"
                 className="w-full px-3 py-2 bg-slate-800 text-blue-100 border border-slate-700 rounded focus:outline-none focus:border-blue-500"
               />
+              <datalist id="projects">
+                {projectNames.map((name) => (
+                  <option key={name} value={name} />
+                ))}
+              </datalist>
             </div>
 
             <div className="flex justify-end space-x-2">

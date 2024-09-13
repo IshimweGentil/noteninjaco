@@ -48,6 +48,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       switch (noteAction) {
         case 'add-notes':
           try {
+            console.log("add-notes");
             const { notes, user_id, project_id } = req.body;
 
             // Generate summary and key topics
@@ -90,6 +91,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
         case 'query-notes':
           try {
+            console.log("query-notes");
             const { data, project_id } = req.body;
             const latestUserMessage = data[data.length - 1].content;
 

@@ -10,6 +10,7 @@ import BackIcon from '@/components/ui/BackIcon';
 import { HoverEffect, Card, CardTitle, CardDescription } from '@/components/ui/card-hover-effect';
 import { ProjectChat } from '@/components/ProjectChat';
 import ChatButton from '@/components/ChatButton';
+import { IconRobot } from '@tabler/icons-react';
 
 
 interface Tab {
@@ -241,7 +242,7 @@ const StudySetPage = () => {
 
   return (
     <div className="container mx-auto px-4">
-      <ChatButton onClick={toggleVisibility} isVisible={isChatVisible} />
+      <ChatButton icon={<IconRobot size={28} />} onClick={toggleVisibility} isVisible={isChatVisible} />
       {isChatVisible && <ProjectChat isVisible={isChatVisible} setIsVisible={setIsChatVisible} closeChat={closeChat} />}
       {setType === 'flashcards' && (
         <div className="mb-2">

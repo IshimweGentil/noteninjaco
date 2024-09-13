@@ -107,13 +107,13 @@ const SummaryPreviewModal: React.FC<SummaryPreviewModalProps> = ({
             <div className="mb-4">
               <input
                 type="text"
-                list="project"
+                list="projects"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Enter summary name"
                 className="w-full px-3 py-2 bg-slate-800 text-blue-100 border border-slate-700 rounded focus:outline-none focus:border-blue-500"
               />
-              <datalist id="project">
+              <datalist id="projects">
                 {projectNames && projectNames.map((name:string) => (
                   <option key={name} value={name} />
                 ))}

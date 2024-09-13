@@ -7,9 +7,10 @@ import { IconMessages } from '@tabler/icons-react';
 interface ChatButtonProps {
   onClick: () => void;
   isVisible: boolean;
+  icon?: React.ReactNode;
 }
 
-const ChatButton: React.FC<ChatButtonProps> = ({ onClick, isVisible }) => {
+const ChatButton: React.FC<ChatButtonProps> = ({ onClick, isVisible, icon }) => {
   return (
     <button
       onClick={onClick}
@@ -18,7 +19,7 @@ const ChatButton: React.FC<ChatButtonProps> = ({ onClick, isVisible }) => {
       }`}
       aria-label="Chat"
     >
-      <IconMessages size={28} />
+      {icon ? icon : <IconMessages size={28} />}
     </button>
   );
 };

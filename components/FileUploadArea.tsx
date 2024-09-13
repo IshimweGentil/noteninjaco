@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from "react";
 import { useDropzone } from "react-dropzone";
-import { filterFiles, parseFiles } from "@/lib/fileUtils";
+import { filterFiles, parseFiles } from "@/utils/fileUtil";
 import { IconClearAll, IconFileX } from "@tabler/icons-react";
 
 interface FileUploadAreaProps {

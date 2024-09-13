@@ -13,8 +13,8 @@ import MagicButton from "@/components/ui/MagicButton";
 import { ArrowRight, Loader2 } from "lucide-react";
 import PreviewModal from "@/components/PreviewModal";
 import SummaryPreviewModal from "@/components/SummaryPreviewModal";
-import { getProjectNames } from '@/lib/firebaseUtil';
-import { addNotesToPinecone } from "@/lib/pineconeUtil";
+import { getProjectNames } from '@/utils/firebaseUtil';
+import { addNotesToPinecone } from "@/utils/pineconeUtil";
 
 
 interface Flashcard {

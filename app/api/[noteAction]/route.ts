@@ -2,7 +2,7 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import OpenAI from 'openai';
 import { Pinecone } from '@pinecone-database/pinecone' // vector database
 import { v4 as uuidv4 } from 'uuid'; // UUID for unique ID generation
-import { createStream } from "@/lib/streamUtil";
+import { createStream } from "@/utils/streamUtil";
 
 
 const openai = new OpenAI({

@@ -55,14 +55,14 @@ const Pricing: React.FC = () => {
         <PricingCard 
           title="Free" 
           price={basicPrice}
-          features={['Basic note conversion', 'Limited flashcards', 'Standard support']}
+          features={['Basic note conversion', 'Limited to 3 projects', 'Access to AI flashcards and summaries']}
           isFree={true}
           onProPlanClick={() => {}}
         />
         <PricingCard 
           title="Pro" 
           price={proPrice}
-          features={['Unlimited note conversion', 'Advanced flashcard features', 'Priority support']}
+          features={['Unlimited note conversion', 'Access to free tier features including NEW FEATURES COMING SOON', 'Unlimited Projects']}
           isFree={false}
           onProPlanClick={handleProPlanClick}
         />

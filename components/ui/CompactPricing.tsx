@@ -65,8 +65,8 @@ const CompactPricing: React.FC = () => {
       price: "$0/month",
       features: [
         { text: "Basic note conversion" },
-        { text: "Limited flashcards" },
-        { text: "Standard support" }
+        { text: "Limited to 3 projects" },
+        { text: "Access to AI flashcards and summaries" }
       ],
       action: 'signup'
     },
@@ -75,8 +75,8 @@ const CompactPricing: React.FC = () => {
       price: "$2.99/month",
       features: [
         { text: "Unlimited note conversion" },
-        { text: "Advanced flashcard features" },
-        { text: "Priority support" }
+        { text: "Unlimited Projects" },
+        { text: "NEW FEATURES COMING SOON" }
       ],
       action: 'unavailable'
     }

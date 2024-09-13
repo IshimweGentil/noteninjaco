@@ -167,9 +167,9 @@ const GeneratePage = () => {
     }
 
     try {
+      await addNotesToPinecone({ user_id: user.id, project_id: projectTitle, text }); // add notes to pinecone
       await batch.commit(); // commit changes
       setIsFlashcardModalOpen(false);
-      // await addNotesToPinecone({ user_id: user.id, project_id: projectTitle, text }); // add notes to pinecone
       console.log("saved notes into pinecone"); // TEST
     } catch (error) {
       console.error(`Error saving ${type}:`, error);

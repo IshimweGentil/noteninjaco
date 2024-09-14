@@ -84,7 +84,7 @@ const QuizPreviewModal: React.FC<QuizPreviewModalProps> = ({
             </button>
             <h2 className="text-2xl font-bold text-blue-100 mb-4 text-center">{title}</h2>
 
-            <motion.div
+            {/* <motion.div
               className="mb-4"
               whileTap={{ scale: 0.95 }}
             >
@@ -115,7 +115,7 @@ const QuizPreviewModal: React.FC<QuizPreviewModalProps> = ({
                   Next
                 </button>
               </div>
-            </motion.div>
+            </motion.div> */}
 
             <div className="mb-4">
               <input

@@ -11,7 +11,9 @@ import { HoverEffect, Card, CardTitle, CardDescription } from '@/components/ui/c
 import { ProjectChat } from '@/components/ProjectChat';
 import ChatButton from '@/components/ChatButton';
 import { IconRobot } from '@tabler/icons-react';
-import { Question } from '@/types/question';
+import { Question } from '@/types/quiz';
+import Quiz from "@/components/Quiz"
+
 
 interface Tab {
   id: string;
@@ -89,7 +91,7 @@ const StudySetPage = () => {
           setFlashcards(fetchedFlashcards);
         } else if (setInfo?.type === 'quiz') {
           const docs = await getDocs(colRef);
-          const fetchedQuestions: Question[] = docs.docs.map(doc => ({ id: doc.id, ...doc.data() } as Question));
+          const fetchedQuestions: Question[] = docs.docs.map(doc => doc.data() as Question);
           setQuiz(fetchedQuestions);
         }
       } catch (error) {
@@ -246,61 +248,7 @@ const StudySetPage = () => {
 
   const renderQuizView = () => (
     <div className="w-full mx-auto">
-      <Card className="p-6">
-        <CardTitle className="text-2xl font-bold mb-4">Quiz</CardTitle>
-        <CardDescription className="text-lg">
-          {quiz?.map((question) => (
-            <div key={question.id} className="mb-4">
-              <h3 className="text-xl font-semibold mb-2">{question.question}</h3>
-              {question.type === 'mc' && question.options && (
-                <div>
-                  {Object.entries(question.options).map(([key, value]) => (
-                    <div key={key} className="mb-2">
-                      <label>
-                        <input
-                          type="radio"
-                          name={`question-${question.id}`}
-                          value={key}
-                          onChange={() => handleAnswerChange(question.id, key)}
-                          checked={quizAnswers[question.id]?.includes(key)}
-                        />
-                        {value}
-                      </label>
-                    </div>
-                  ))}
-                </div>
-              )}
-              {question.type === 'sm' && question.options && (
-                <div>
-                  {Object.entries(question.options).map(([key, value]) => (
-                    <div key={key} className="mb-2">
-                      <label>
-                        <input
-                          type="checkbox"
-                          value={key}
-                          onChange={() => handleAnswerChange(question.id, key)}
-                          checked={quizAnswers[question.id]?.includes(key)}
-                        />
-                        {value}
-                      </label>
-                    </div>
-                  ))}
-                </div>
-              )}
-              {question.type === 'sa' && (
-                <div className="mb-2">
-                  <textarea
-                    rows={3}
-                    placeholder="Type your answer here..."
-                    onChange={(e) => handleAnswerChange(question.id, e.target.value)}
-                    value={quizAnswers[question.id]?.[0] || ''}
-                  />
-                </div>
-              )}
-            </div>
-          ))}
-        </CardDescription>
-      </Card>
+      <Quiz quiz={quiz}/>
     </div>
   );
 

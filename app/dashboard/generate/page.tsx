@@ -203,16 +203,16 @@ const GeneratePage = () => {
       } else if (type === "summary") {
         const summaryDocRef = doc(colRef, "summary");
         batch.set(summaryDocRef, { content: summary });
-      } else {
+      } else if (type === "quiz") {
         quiz.forEach((question: Question) => {
-          const questionDocRef = doc(colRef);
+          const questionDocRef = doc(colRef); // Let Firestore generate a unique ID
           batch.set(questionDocRef, question);
         });
       }
-
+  
       // Commit batch
       await batch.commit();
-
+  
       // Close modals based on type
       if (type === "flashcards") {
         setIsFlashcardModalOpen(false);
@@ -229,7 +229,7 @@ const GeneratePage = () => {
           : "An unknown error occurred while saving"
       );
     }
-  };  
+  };
 
   return (
     <div className="flex flex-col min-h-screen">

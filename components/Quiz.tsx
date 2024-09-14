@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Question } from '@/types/quiz';
 
 interface QuizProps {
-  quiz: Question[];
+  quiz: Question[] | null;
 }
 
 const Quiz: React.FC<QuizProps> = ({ quiz }) => {

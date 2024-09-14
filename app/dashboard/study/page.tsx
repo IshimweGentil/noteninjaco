@@ -89,7 +89,7 @@ const StudyPage: React.FC = () => {
 
   const hoverEffectItems = flashcardSets.map(set => ({
     title: set.name,
-    description: `${set.name} flashcard set`,
+    description: `${set.name} set`,
     link: `/dashboard/study/${encodeURIComponent(set.name)}`
   }));
 
@@ -97,7 +97,7 @@ const StudyPage: React.FC = () => {
     <div className="container mx-auto px-4 py-8 text-center">
       <h1 className="text-2xl">Let&apos;s Study</h1>
       {flashcardSets.length === 0 ? (
-        <p>You don&apos;t have any saved flashcard sets yet.</p>
+        <p>You don&apos;t have any saved sets yet.</p>
       ) : (
         <HoverEffect items={hoverEffectItems} isLink={true}>
           {(item, index) => (

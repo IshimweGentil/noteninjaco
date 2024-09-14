@@ -1,7 +1,13 @@
 import { NextResponse } from 'next/server';
 import pdfParse from 'pdf-parse';
+import mammoth from 'mammoth';
 
 export const dynamic = 'force-dynamic';
+
+async function extractTextFromDOCX(buffer: Buffer): Promise<string> {
+  const result = await mammoth.extractRawText({ buffer });
+  return result.value;
+}
 
 export async function POST(req: Request) {
   console.log("REQUEST RECEIVED!");
@@ -22,12 +28,20 @@ export async function POST(req: Request) {
             const buffer = Buffer.from(arrayBuffer);
             console.log(`Buffer created for ${value.name}, size: ${buffer.length} bytes`);
             
-            const data = await pdfParse(buffer, {
-              max: 0, // Remove any page limitation
-            });
+            let extractedText = '';
             
-            console.log(`PDF parsed for ${value.name}, text length: ${data.text.length}`);
-            return data.text.trim(); // Trim any leading/trailing whitespace
+            if (value.name.toLowerCase().endsWith('.pdf')) {
+              const data = await pdfParse(buffer);
+              extractedText = data.text.trim();
+            } else if (value.name.toLowerCase().endsWith('.docx')) {
+              extractedText = await extractTextFromDOCX(buffer);
+            } else {
+              console.warn(`Unsupported file type: ${value.name}`);
+              return '';
+            }
+            
+            console.log(`Text extracted from ${value.name}, length: ${extractedText.length}`);
+            return extractedText;
           } catch (error) {
             console.error(`Error processing file ${value.name}:`, error);
             return '';
@@ -37,15 +51,25 @@ export async function POST(req: Request) {
       }
     });
 
-    const text = await Promise.all(filePromises);
-    console.log(`Number of processed texts: ${text.length}`);
+    const texts = await Promise.all(filePromises);
+    console.log(`Number of processed texts: ${texts.length}`);
 
-    const result = text.filter(txt => txt.length > 0).join('\n');
+    const result = texts.filter(txt => txt.length > 0).join('\n');
     console.log(`Total length of non-empty texts: ${result.length}`);
+
+    if (result.length === 0) {
+      console.warn('No text extracted from any files');
+    }
 
     return NextResponse.json({ text: result });
   } catch (error) {
     console.error("Error in POST handler:", error);
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    let errorMessage = 'Internal Server Error';
+    if (error instanceof Error) {
+      errorMessage = error.message;
+    } else if (typeof error === 'string') {
+      errorMessage = error;
+    }
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }

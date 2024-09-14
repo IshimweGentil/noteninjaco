@@ -34,10 +34,17 @@ const Hero = () => {
             className="text-center text-[40px] md:text-5xl lg:text-6xl text-white"
           />
           <p className="pb-10 tracking-widest text-xs text-center text-blue-100 max-w-80">
-            Designed and developed by 
-            Ishimwe Gentil,
-            Mounir Mkhallati,
-            and Kyle Huang.
+            Designed and developed by{" "}
+            <a href="https://www.linkedin.com/in/ishimweg" target="_blank" rel="noopener noreferrer" className="hover:underline">
+              Ishimwe Gentil
+            </a>,{" "}
+            <a href="https://www.linkedin.com/in/mounirmkhallati/  " target="_blank" rel="noopener noreferrer" className="hover:underline">
+              Mounir Mkhallati
+            </a>,{" "}
+            and{" "}
+            <a href="https://www.linkedin.com/in/kyle-h/" target="_blank" rel="noopener noreferrer" className="hover:underline">
+              Kyle Huang
+            </a>.
           </p>
           
           <SignedIn>

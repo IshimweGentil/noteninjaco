@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 
 interface Item {
+  id?: string;
   title: string;
   description: string;
   link: string;
@@ -38,7 +39,7 @@ export const HoverEffect: React.FC<HoverEffectProps> = ({
               {hoveredIndex === idx && (
                 <motion.span
                   className="absolute inset-0 h-full w-full bg-neutral-200 dark:bg-slate-800/[0.8] block rounded-3xl"
-                  layoutId="hoverBackground"
+                  layoutId={`hoverBackground-${item.id || idx}`}
                   initial={{ opacity: 0 }}
                   animate={{
                     opacity: 1,
@@ -62,10 +63,12 @@ export const HoverEffect: React.FC<HoverEffectProps> = ({
           </>
         );
 
+        const key = item.id || `item-${idx}`;
+
         return isLink ? (
           <Link
             href={item.link}
-            key={item.link}
+            key={key}
             className="relative group block p-2 h-full w-full"
             onMouseEnter={() => setHoveredIndex(idx)}
             onMouseLeave={() => setHoveredIndex(null)}
@@ -74,7 +77,7 @@ export const HoverEffect: React.FC<HoverEffectProps> = ({
           </Link>
         ) : (
           <div
-            key={item.link}
+            key={key}
             className="relative group block p-2 h-full w-full"
             onMouseEnter={() => setHoveredIndex(idx)}
             onMouseLeave={() => setHoveredIndex(null)}

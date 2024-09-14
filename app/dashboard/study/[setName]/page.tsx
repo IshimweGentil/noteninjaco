@@ -4,10 +4,13 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useUser } from '@clerk/nextjs';
 import { useParams, useRouter } from 'next/navigation';
 import { db } from '@/firebase';
-import { collection, doc, getDocs } from 'firebase/firestore';
+import { collection, doc, getDocs, getDoc } from 'firebase/firestore';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import BackIcon from '@/components/ui/BackIcon';
 import { HoverEffect, Card, CardTitle, CardDescription } from '@/components/ui/card-hover-effect';
+import ChatButton from '@/components/ChatButton';
+import { Chat } from '@/components/Chat';
+
 
 interface Tab {
   id: string;
@@ -44,33 +47,60 @@ interface Flashcard {
   back: string;
 }
 
+interface Summary {
+  content: string;
+}
+
 const StudySetPage = () => {
   const { isLoaded, isSignedIn, user } = useUser();
   const params = useParams();
   const router = useRouter();
   const setName = decodeURIComponent(params.setName as string);
   const [flashcards, setFlashcards] = useState<Flashcard[]>([]);
+  const [summary, setSummary] = useState<Summary | null>(null);
   const [flipped, setFlipped] = useState<{ [key: string]: boolean }>({});
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('single');
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
+  const [setType, setSetType] = useState<'flashcards' | 'summary'>('flashcards');
+  const [isVisible, setIsVisible] = useState(false);
+
+  const toggleVisibility = useCallback(() => {
+    setIsVisible(prevState => !prevState);
+  }, []);
+  
+  const closeChat = useCallback(() => {
+    setIsVisible(false);
+  }, []);
 
   useEffect(() => {
-    async function getFlashcards() {
+    async function getStudySet() {
       if (!user || !setName) return;
       try {
-        const colRef = collection(doc(collection(db, 'users'), user.id), setName);
-        const docs = await getDocs(colRef);
-        const fetchedFlashcards: Flashcard[] = docs.docs.map(doc => ({ id: doc.id, ...doc.data() } as Flashcard));
-        setFlashcards(fetchedFlashcards);
+        const userDocRef = doc(collection(db, 'users'), user.id);
+        const userDocSnap = await getDoc(userDocRef);
+        const userData = userDocSnap.data();
+        const setInfo = userData?.flashcards.find((set: any) => set.name === setName);
+        setSetType(setInfo?.type || 'flashcards');
+
+        const colRef = collection(userDocRef, setName);
+        if (setInfo?.type === 'summary') {
+          const summaryDocRef = doc(colRef, 'summary');
+          const summaryDocSnap = await getDoc(summaryDocRef);
+          setSummary(summaryDocSnap.data() as Summary);
+        } else {
+          const docs = await getDocs(colRef);
+          const fetchedFlashcards: Flashcard[] = docs.docs.map(doc => ({ id: doc.id, ...doc.data() } as Flashcard));
+          setFlashcards(fetchedFlashcards);
+        }
       } catch (error) {
-        console.error("Error fetching flashcards:", error);
+        console.error("Error fetching study set:", error);
         // Handle error (e.g., show error message to user)
       } finally {
         setIsLoading(false);
       }
     }
-    getFlashcards();
+    getStudySet();
   }, [user, setName]);
 
   const handleCardClick = useCallback((id: string) => {
@@ -87,6 +117,23 @@ const StudySetPage = () => {
     setFlipped({});
   }, [flashcards.length]);
 
+  const formatSummary = (text: string) => {
+    // Replace [important] tags with styled spans
+    let formattedText = text.replace(
+      /\[important\](.*?)\[\/important\]/g, 
+      '<span class="bg-blue-100  text-black px-1 rounded font-semibold">$1</span>'
+    );
+
+    // Convert markdown-style headings to HTML headings with classes
+    formattedText = formattedText.replace(/^## (.*$)/gim, '<h2 class="text-xl font-bold mt-4 mb-2 text-blue-300">$1</h2>');
+    formattedText = formattedText.replace(/^# (.*$)/gim, '<h1 class="text-2xl font-bold mt-6 mb-3 text-blue-200">$1</h1>');
+
+    // Convert line breaks to <br> tags
+    formattedText = formattedText.replace(/\n/g, '<br>');
+
+    return formattedText;
+  };
+
   if (!isLoaded || !isSignedIn) {
     return <LoadingSpinner />;
   }
@@ -95,10 +142,12 @@ const StudySetPage = () => {
     return <LoadingSpinner />;
   }
 
-  const tabs: Tab[] = [
-    { id: 'single', label: 'Single Card View' },
-    { id: 'grid', label: 'Grid View' },
-  ];
+  const tabs: Tab[] = setType === 'flashcards' 
+    ? [
+        { id: 'single', label: 'Single Card View' },
+        { id: 'grid', label: 'Grid View' },
+      ]
+    : [];
 
   const renderGridView = () => {
     const hoverEffectItems = flashcards.map(flashcard => ({
@@ -106,6 +155,8 @@ const StudySetPage = () => {
       description: flashcard.back,
       link: '#',
     }));
+
+    
 
     return (
       <HoverEffect 
@@ -115,6 +166,7 @@ const StudySetPage = () => {
       >
         {(item, index) => (
           <div 
+            key={flashcards[index].id}
             onClick={() => handleCardClick(flashcards[index].id)}
             className="h-full w-full transition-transform duration-200 transform hover:scale-105 active:scale-95"
           >
@@ -176,14 +228,30 @@ const StudySetPage = () => {
     </div>
   );
 
+  const renderSummaryView = () => (
+    <div className="w-full mx-auto">
+      <Card className="p-6">
+        <CardTitle className="text-2xl font-bold mb-4">Summary</CardTitle>
+        <CardDescription className="text-lg prose prose-invert max-w-none">
+          <div dangerouslySetInnerHTML={{ __html: formatSummary(summary?.content || '') }} />
+        </CardDescription>
+      </Card>
+    </div>
+  );
+
   return (
     <div className="container mx-auto px-4">
-      <div className="mb-2">
-        <Tabs tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} />
-      </div>
+      {setType === 'flashcards' && (
+        <div className="mb-2">
+          <Tabs tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} />
+        </div>
+      )}
       <h1 className="text-2xl mt-4 font-bold mb-6">Studying: {setName}</h1>
       <div className="mt-6">
-        {activeTab === 'grid' ? renderGridView() : renderSingleCardView()}
+        {setType === 'flashcards' 
+          ? (activeTab === 'grid' ? renderGridView() : renderSingleCardView())
+          : renderSummaryView()
+        }
       </div>
       <div className="mt-6">
         <div 
@@ -194,6 +262,8 @@ const StudySetPage = () => {
           Back to Flashcard Sets
         </div>
       </div>
+      {/* <ChatButton onClick={toggleVisibility} isVisible={isVisible} />
+      {isVisible && <Chat isVisible={isVisible} setIsVisible={setIsVisible} closeChat={closeChat} />} */}
     </div>
   );
 };

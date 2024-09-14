@@ -23,7 +23,7 @@ const loader = new JSONLoader(
     filePath,
     [
         "/services", // Load names of all services            
-        "/pricing", // Load pricing plans
+        "/pricing_plans", // Load pricing plans
         "/contact_information", // Load the contact email
     ]
 );

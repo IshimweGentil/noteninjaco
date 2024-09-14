@@ -40,11 +40,6 @@ const NavBar: React.FC = () => {
                     Sign In
                   </button>
                 </SignInButton>
-                <SignUpButton mode="modal">
-                  <button className="bg-transparent border border-purple-600 text-purple-600 px-4 py-2 rounded hover:bg-purple-600 hover:text-white transition duration-300">
-                    Sign Up
-                  </button>
-                </SignUpButton>
               </>
             ) : (
               <UserButton afterSignOutUrl="/" />

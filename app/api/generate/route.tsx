@@ -3,7 +3,7 @@ import OpenAI from "openai";
 
 // Define the system prompt for generating flashcards
 const systemPrompt = `
-You are a flashcard creator, you take in text and create multiple flashcards from it. Make sure to create exactly 10 flashcards.
+You are a flashcard creator, you take in text and create multiple flashcards from it.
 Both front and back should be one sentence long.
 
 1. Create clear and concise questions for the front of the flashcard.
@@ -16,7 +16,7 @@ Both front and back should be one sentence long.
 8. Tailor the difficulty level of the flashcards to the user's specified preferences.
 9. If given a body of text, extract the most important and relevant information for the flashcards.
 10. Aim to create a balanced set of flashcards that covers the topic comprehensively.
-11. Only generate 10 flashcards.
+11. Generate as many flashcards as needed to cover the material effectively.
 
 Remember, the goal is to facilitate effective learning and retention of the information through these flashcards.
 
@@ -46,7 +46,7 @@ export async function POST(req: Request) {
         { role: "system", content: systemPrompt },
         { role: "user", content: data },
       ],
-      model: "gpt-4-1106-preview", // Updated to the correct model name
+      model: "gpt-4o-mini", // Updated to the correct model name
       response_format: { type: "json_object" },
     });
 

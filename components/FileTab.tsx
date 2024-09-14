@@ -8,7 +8,7 @@ interface FileTabProps {
 
 const FileTab: React.FC<FileTabProps> = ({text, setText}) => {
   return (
-    <FileUploadArea text={text} setText={setText} />
+    <FileUploadArea setText={setText} />
   );
 };
 

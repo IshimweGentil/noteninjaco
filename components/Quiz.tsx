@@ -10,12 +10,12 @@ const Quiz: React.FC<QuizProps> = ({ quiz }) => {
 
   // Handle submit button click
   const handleSubmit = () => {
-    setIsSubmitted(true);
+    setIsSubmitted(!isSubmitted);
   };
 
   return (
     <div className="max-w-4xl mx-auto p-6">
-      {quiz.map((question, index) => (
+      {quiz!.map((question, index) => (
         <div key={index} className="mb-6">
           <h3 className="text-lg font-semibold">Question {index + 1}:</h3>
           <p className="mt-2">{question.question}</p>
@@ -50,7 +50,14 @@ const Quiz: React.FC<QuizProps> = ({ quiz }) => {
 
           {/* Render answer for short-answer quiz */}
           {question.type === 'sa' && isSubmitted && question.answer && (
-            <p className="italic text-gray-700 mt-4">{question.answer}</p>
+            <p className="italic text-purple-600 mt-4"><strong>Correct Answer: </strong><span>{question.answer}</span></p>
+          )}
+
+          {/* Render answer for multiple-choice and select-all questions */}
+          {question.type === 'mc' && isSubmitted && question.answers && (
+            <div className="flex flex-row">
+              <p className="text-purple-600"><strong>Correct Answer: </strong><span>{Array.isArray(question.answers) ? question.answers.join(', ') : question.answers}</span></p>
+            </div>
           )}
         </div>
       ))}

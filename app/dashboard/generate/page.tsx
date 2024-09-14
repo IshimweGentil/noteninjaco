@@ -13,9 +13,9 @@ import MagicButton from "@/components/ui/MagicButton";
 import { ArrowRight, Loader2 } from "lucide-react";
 import PreviewModal from "@/components/PreviewModal";
 import SummaryPreviewModal from "@/components/SummaryPreviewModal";
+import QuizPreviewModal from "@/components/QuizPreviewModal"; // Import QuizPreviewModal
 import { getProjectNames } from '@/utils/firebaseUtil';
-import { addNotesToPinecone } from "@/utils/pineconeUtil";
-
+import { Question } from '@/types/quiz'; // Import Question type
 
 interface Flashcard {
   front: string;
@@ -33,14 +33,16 @@ const GeneratePage = () => {
   const [activeTab, setActiveTab] = useState("file");
   const [flashcards, setFlashcards] = useState<Flashcard[]>([]);
   const [summary, setSummary] = useState("");
+  const [quiz, setQuiz] = useState<Question[]>([]); // Use Question type for quiz
   const [isFlashcardModalOpen, setIsFlashcardModalOpen] = useState(false);
   const [isSummaryModalOpen, setIsSummaryModalOpen] = useState(false);
+  const [isQuizModalOpen, setIsQuizModalOpen] = useState(false); // Add quiz modal state
   const [isFlashcardLoading, setIsFlashcardLoading] = useState(false);
   const [isSummaryLoading, setIsSummaryLoading] = useState(false);
-  const [projectTitle, setProjectTitle] = useState('')
+  const [isQuizLoading, setIsQuizLoading] = useState(false); // Add quiz loading state
+  const [projectTitle, setProjectTitle] = useState('');
   const [error, setError] = useState<string | null>(null);
-  const [projectNames, setProjectNames] = useState<string[]>([])
-
+  const [projectNames, setProjectNames] = useState<string[]>([]);
 
   useEffect(() => {
     const getNames = async () => {
@@ -52,9 +54,9 @@ const GeneratePage = () => {
       } catch (error) {
         console.error("Error fetching project names:", error);
       }
-    }
+    };
     getNames();
-  }, []);
+  }, [user]);
 
   if (!isLoaded || !isSignedIn) {
     return <LoadingSpinner />;
@@ -133,7 +135,41 @@ const GeneratePage = () => {
     }
   };
 
-  const handleSave = async (name: string, type: "flashcards" | "summary") => {
+  const generateQuiz = async () => {
+    if (text.trim() === "") return;
+    setIsQuizLoading(true);
+    setError(null);
+    console.log("Generating: quiz");
+
+    try {
+      const response = await fetch("/api/quiz", {
+        method: "POST",
+        body: JSON.stringify({ text }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      console.log("Received quiz data:", data);
+      if (!data) {
+        throw new Error("No quiz received from API");
+      }
+      setQuiz(data);
+      setIsQuizModalOpen(true); // Open the quiz modal
+    } catch (error) {
+      console.error("Error generating quiz:", error);
+      setError(
+        error instanceof Error ? error.message : "An unknown error occurred"
+      );
+    } finally {
+      setIsQuizLoading(false);
+    }
+  };
+
+  const handleSave = async (name: string, type: "flashcards" | "summary" | "quiz") => {
     if (!user) {
       console.error("User not authenticated");
       return;
@@ -145,7 +181,7 @@ const GeneratePage = () => {
     const userDocRef = doc(collection(db, "users"), user.id);
     const docSnap = await getDoc(userDocRef);
 
-    // create/merge flashcards
+    // Create/merge flashcards
     if (docSnap.exists()) {
       const collections = docSnap.data().flashcards || [];
       collections.push({ name, type });
@@ -154,23 +190,33 @@ const GeneratePage = () => {
       batch.set(userDocRef, { flashcards: [{ name, type }] });
     }
 
-    // save flashcards/summary
+    // Save flashcards/summary/quiz
     const colRef = collection(userDocRef, name);
     if (type === "flashcards") {
       flashcards.forEach((flashcard: Flashcard) => {
         const cardDocRef = doc(colRef);
         batch.set(cardDocRef, flashcard);
       });
-    } else {
+    } else if (type === "summary") {
       const summaryDocRef = doc(colRef, "summary");
-      batch.set(summaryDocRef, { content: summary }); // Save the summary as-is
+      batch.set(summaryDocRef, { content: summary });
+    } else if (type === "quiz") {
+      quiz.forEach((question: Question) => {
+        const questionDocRef = doc(colRef, "quiz");
+        batch.set(questionDocRef, question);
+      });
     }
 
     try {
-      // await addNotesToPinecone({ user_id: user.id, project_id: projectTitle, text }); // add notes to pinecone
-      await batch.commit(); // commit changes
-      setIsFlashcardModalOpen(false);
-      console.log("saved notes into pinecone"); // TEST
+      await batch.commit(); // Commit changes
+      if (type === "flashcards") {
+        setIsFlashcardModalOpen(false);
+      } else if (type === "summary") {
+        setIsSummaryModalOpen(false);
+      } else if (type === "quiz") {
+        setIsQuizModalOpen(false); // Close the quiz modal
+      }
+      console.log("Saved notes into Pinecone"); // TEST
     } catch (error) {
       console.error(`Error saving ${type}:`, error);
       setError(
@@ -198,36 +244,25 @@ const GeneratePage = () => {
         <div>
           <div className="flex justify-start space-x-4">
             <MagicButton
-              title={
-                isFlashcardLoading ? "Generating..." : "Generate Flashcards"
-              }
-              icon={
-                isFlashcardLoading ? (
-                  <Loader2 className="animate-spin" size={16} />
-                ) : (
-                  <ArrowRight size={16} />
-                )
-              }
+              title={isFlashcardLoading ? "Generating..." : "Generate Flashcards"}
+              icon={isFlashcardLoading ? <Loader2 className="animate-spin" size={16} /> : <ArrowRight size={16} />}
               position="right"
               onClick={generateFlashcards}
-              disabled={
-                isFlashcardLoading || isSummaryLoading || text.trim() === ""
-              }
+              disabled={isFlashcardLoading || isSummaryLoading || isQuizLoading || text.trim() === ""}
             />
             <MagicButton
               title={isSummaryLoading ? "Generating..." : "Generate Summary"}
-              icon={
-                isSummaryLoading ? (
-                  <Loader2 className="animate-spin" size={16} />
-                ) : (
-                  <ArrowRight size={16} />
-                )
-              }
-              position="right"
+              icon={isSummaryLoading ? <Loader2 className="animate-spin" size={16} /> : <ArrowRight size={16} />}
+              position="center"
               onClick={generateSummary}
-              disabled={
-                isFlashcardLoading || isSummaryLoading || text.trim() === ""
-              }
+              disabled={isFlashcardLoading || isSummaryLoading || isQuizLoading || text.trim() === ""}
+            />
+            <MagicButton
+              title={isQuizLoading ? "Generating..." : "Generate Quiz"}
+              icon={isQuizLoading ? <Loader2 className="animate-spin" size={16} /> : <ArrowRight size={16} />}
+              position="right"
+              onClick={generateQuiz}
+              disabled={isFlashcardLoading || isSummaryLoading || isQuizLoading || text.trim() === ""}
             />
           </div>
 
@@ -250,6 +285,16 @@ const GeneratePage = () => {
             onSave={(name) => handleSave(name, "summary")}
             onRegenerate={generateSummary}
             isLoading={isSummaryLoading}
+            projectNames={projectNames}
+          />
+
+          <QuizPreviewModal
+            isOpen={isQuizModalOpen}
+            onClose={() => setIsQuizModalOpen(false)}
+            quiz={quiz}
+            onSave={(name) => handleSave(name, "quiz")}
+            onRegenerate={generateQuiz}
+            isLoading={isQuizLoading}
             projectNames={projectNames}
           />
         </div>

@@ -92,7 +92,6 @@ const StudyPage: React.FC = () => {
                 </button>
               </CardTitle>
               <CardDescription>{item.description}</CardDescription>
-
             </Card>
           )}
         </HoverEffect>

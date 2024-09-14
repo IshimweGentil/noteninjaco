@@ -11,7 +11,7 @@ import { HoverEffect, Card, CardTitle, CardDescription } from '@/components/ui/c
 import { ProjectChat } from '@/components/ProjectChat';
 import ChatButton from '@/components/ChatButton';
 import { IconRobot } from '@tabler/icons-react';
-
+import { Question } from '@/types/question';
 
 interface Tab {
   id: string;
@@ -59,12 +59,14 @@ const StudySetPage = () => {
   const setName = decodeURIComponent(params.setName as string);
   const [flashcards, setFlashcards] = useState<Flashcard[]>([]);
   const [summary, setSummary] = useState<Summary | null>(null);
+  const [quiz, setQuiz] = useState<Question[] | null>(null);
   const [flipped, setFlipped] = useState<{ [key: string]: boolean }>({});
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('single');
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
-  const [setType, setSetType] = useState<'flashcards' | 'summary'>('flashcards');
+  const [setType, setSetType] = useState<'flashcards' | 'summary' | 'quiz'>('flashcards');
   const [isChatVisible, setIsChatVisible] = useState(false);
+  const [quizAnswers, setQuizAnswers] = useState<{ [questionId: number]: string[] }>({}); // Track user's answers
 
   useEffect(() => {
     async function getStudySet() {
@@ -81,14 +83,17 @@ const StudySetPage = () => {
           const summaryDocRef = doc(colRef, 'summary');
           const summaryDocSnap = await getDoc(summaryDocRef);
           setSummary(summaryDocSnap.data() as Summary);
-        } else {
+        } else if (setInfo?.type === 'flashcards') {
           const docs = await getDocs(colRef);
           const fetchedFlashcards: Flashcard[] = docs.docs.map(doc => ({ id: doc.id, ...doc.data() } as Flashcard));
           setFlashcards(fetchedFlashcards);
+        } else if (setInfo?.type === 'quiz') {
+          const docs = await getDocs(colRef);
+          const fetchedQuestions: Question[] = docs.docs.map(doc => ({ id: doc.id, ...doc.data() } as Question));
+          setQuiz(fetchedQuestions);
         }
       } catch (error) {
         console.error("Error fetching study set:", error);
-        // Handle error (e.g., show error message to user)
       } finally {
         setIsLoading(false);
       }
@@ -118,20 +123,21 @@ const StudySetPage = () => {
     setFlipped({});
   }, [flashcards.length]);
 
+  const handleAnswerChange = (questionId: number, answer: string) => {
+    setQuizAnswers(prev => ({
+      ...prev,
+      [questionId]: [...(prev[questionId] || []), answer]
+    }));
+  };
+
   const formatSummary = (text: string) => {
-    // Replace [important] tags with styled spans
     let formattedText = text.replace(
       /\[important\](.*?)\[\/important\]/g, 
       '<span class="bg-blue-100  text-black px-1 rounded font-semibold">$1</span>'
     );
-
-    // Convert markdown-style headings to HTML headings with classes
     formattedText = formattedText.replace(/^## (.*$)/gim, '<h2 class="text-xl font-bold mt-4 mb-2 text-blue-300">$1</h2>');
     formattedText = formattedText.replace(/^# (.*$)/gim, '<h1 class="text-2xl font-bold mt-6 mb-3 text-blue-200">$1</h1>');
-
-    // Convert line breaks to <br> tags
     formattedText = formattedText.replace(/\n/g, '<br>');
-
     return formattedText;
   };
 
@@ -156,8 +162,6 @@ const StudySetPage = () => {
       description: flashcard.back,
       link: '#',
     }));
-
-    
 
     return (
       <HoverEffect 
@@ -240,6 +244,66 @@ const StudySetPage = () => {
     </div>
   );
 
+  const renderQuizView = () => (
+    <div className="w-full mx-auto">
+      <Card className="p-6">
+        <CardTitle className="text-2xl font-bold mb-4">Quiz</CardTitle>
+        <CardDescription className="text-lg">
+          {quiz?.map((question) => (
+            <div key={question.id} className="mb-4">
+              <h3 className="text-xl font-semibold mb-2">{question.question}</h3>
+              {question.type === 'mc' && question.options && (
+                <div>
+                  {Object.entries(question.options).map(([key, value]) => (
+                    <div key={key} className="mb-2">
+                      <label>
+                        <input
+                          type="radio"
+                          name={`question-${question.id}`}
+                          value={key}
+                          onChange={() => handleAnswerChange(question.id, key)}
+                          checked={quizAnswers[question.id]?.includes(key)}
+                        />
+                        {value}
+                      </label>
+                    </div>
+                  ))}
+                </div>
+              )}
+              {question.type === 'sm' && question.options && (
+                <div>
+                  {Object.entries(question.options).map(([key, value]) => (
+                    <div key={key} className="mb-2">
+                      <label>
+                        <input
+                          type="checkbox"
+                          value={key}
+                          onChange={() => handleAnswerChange(question.id, key)}
+                          checked={quizAnswers[question.id]?.includes(key)}
+                        />
+                        {value}
+                      </label>
+                    </div>
+                  ))}
+                </div>
+              )}
+              {question.type === 'sa' && (
+                <div className="mb-2">
+                  <textarea
+                    rows={3}
+                    placeholder="Type your answer here..."
+                    onChange={(e) => handleAnswerChange(question.id, e.target.value)}
+                    value={quizAnswers[question.id]?.[0] || ''}
+                  />
+                </div>
+              )}
+            </div>
+          ))}
+        </CardDescription>
+      </Card>
+    </div>
+  );
+
   return (
     <div className="container mx-auto px-4">
       <ChatButton icon={<IconRobot size={28} />} onClick={toggleVisibility} isVisible={isChatVisible} />
@@ -253,7 +317,11 @@ const StudySetPage = () => {
       <div className="mt-6">
         {setType === 'flashcards' 
           ? (activeTab === 'grid' ? renderGridView() : renderSingleCardView())
-          : renderSummaryView()
+          : setType === 'summary'
+          ? renderSummaryView()
+          : setType === 'quiz'
+          ? renderQuizView()
+          : null
         }
       </div>
       <div className="mt-6">

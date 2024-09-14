@@ -7,7 +7,7 @@ const openai = new OpenAI({
 
 const systemPrompt = `
 Purpose:
-Create a quiz based on the provided topics. The quiz should assess both the user’s understanding and problem-solving skills through a variety of question types and difficulty levels.
+Create a quiz based on the provided topics like a real exam. The quiz should assess both the user’s understanding and problem-solving skills through a variety of question types and difficulty levels.
 
 Specifications:
 - Include thorough problems that require deeper analysis. For multiple-choice questions, provide detailed steps or outlines for solving the problem. For example, in the context of Data Structures and Algorithms, you might ask about the best data structure or algorithm for a problem, the best approach, the time and space complexity, or the reasoning behind choosing one algorithm over another.
@@ -119,7 +119,6 @@ export async function POST(req: Request) {
 
     // Extract and clean up quiz data
     let quizText = completion.choices[0].message.content;
-    console.log("quizText: ", quizText);
 
     // Remove backticks and extra characters if present
     quizText = quizText!.replace(/^```json|```$/g, '').trim();
@@ -131,16 +130,13 @@ export async function POST(req: Request) {
       throw new Error("Invalid JSON format in the response");
     }
 
-    console.log("start")
-    console.log("quiz: ", quiz);
-
     // Validate quiz structure
     if (!quiz || !Array.isArray(quiz)) {
       throw new Error("Invalid quiz format");
     }
     console.log("end")
 
-    return NextResponse.json({ quiz });
+    return NextResponse.json(quiz);
   } catch (error) {
     console.error("Error generating quiz:", error);
     return NextResponse.json({ error: "Failed to generate quiz" }, { status: 500 });

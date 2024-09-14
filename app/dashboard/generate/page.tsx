@@ -154,6 +154,7 @@ const GeneratePage = () => {
       }
       const data = await response.json();
       console.log("Received quiz data:", data);
+      console.log(data.quiz);
       if (!data) {
         throw new Error("No quiz received from API");
       }
@@ -174,49 +175,52 @@ const GeneratePage = () => {
       console.error("User not authenticated");
       return;
     }
-
+  
     setProjectTitle(name);
-
+  
     const batch = writeBatch(db);
     const userDocRef = doc(collection(db, "users"), user.id);
-    const docSnap = await getDoc(userDocRef);
-
-    // Create/merge flashcards
-    if (docSnap.exists()) {
-      const collections = docSnap.data().flashcards || [];
-      collections.push({ name, type });
-      batch.set(userDocRef, { flashcards: collections }, { merge: true });
-    } else {
-      batch.set(userDocRef, { flashcards: [{ name, type }] });
-    }
-
-    // Save flashcards/summary/quiz
-    const colRef = collection(userDocRef, name);
-    if (type === "flashcards") {
-      flashcards.forEach((flashcard: Flashcard) => {
-        const cardDocRef = doc(colRef);
-        batch.set(cardDocRef, flashcard);
-      });
-    } else if (type === "summary") {
-      const summaryDocRef = doc(colRef, "summary");
-      batch.set(summaryDocRef, { content: summary });
-    } else if (type === "quiz") {
-      quiz.forEach((question: Question) => {
-        const questionDocRef = doc(colRef, "quiz");
-        batch.set(questionDocRef, question);
-      });
-    }
-
+  
     try {
-      await batch.commit(); // Commit changes
+      const docSnap = await getDoc(userDocRef);
+  
+      // Create/merge flashcards
+      if (docSnap.exists()) {
+        const collections = docSnap.data().flashcards || [];
+        collections.push({ name, type });
+        batch.set(userDocRef, { flashcards: collections }, { merge: true });
+      } else {
+        batch.set(userDocRef, { flashcards: [{ name, type }] });
+      }
+  
+      // Save flashcards/summary/quiz
+      const colRef = collection(userDocRef, name);
+      if (type === "flashcards") {
+        flashcards.forEach((flashcard: Flashcard) => {
+          const cardDocRef = doc(colRef);
+          batch.set(cardDocRef, flashcard);
+        });
+      } else if (type === "summary") {
+        const summaryDocRef = doc(colRef, "summary");
+        batch.set(summaryDocRef, { content: summary });
+      } else {
+        quiz.forEach((question: Question) => {
+          const questionDocRef = doc(colRef);
+          batch.set(questionDocRef, question);
+        });
+      }
+
+      // Commit batch
+      await batch.commit();
+
+      // Close modals based on type
       if (type === "flashcards") {
         setIsFlashcardModalOpen(false);
       } else if (type === "summary") {
         setIsSummaryModalOpen(false);
       } else if (type === "quiz") {
-        setIsQuizModalOpen(false); // Close the quiz modal
-      }
-      console.log("Saved notes into Pinecone"); // TEST
+        setIsQuizModalOpen(false);
+      }      
     } catch (error) {
       console.error(`Error saving ${type}:`, error);
       setError(
@@ -225,7 +229,7 @@ const GeneratePage = () => {
           : "An unknown error occurred while saving"
       );
     }
-  };
+  };  
 
   return (
     <div className="flex flex-col min-h-screen">

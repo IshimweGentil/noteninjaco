@@ -27,7 +27,6 @@ const GeneratePage = () => {
   const [isFlashcardLoading, setIsFlashcardLoading] = useState(false);
   const [isSummaryLoading, setIsSummaryLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [summaryStreamUrl, setSummaryStreamUrl] = useState<string | null>(null);
 
   if (!isLoaded || !isSignedIn) {
     return <LoadingSpinner />;
@@ -70,7 +69,6 @@ const GeneratePage = () => {
     console.log("Generating: summary");
 
     try {
-      // Instead of fetching the entire summary, we're just initiating the summarization process
       const response = await fetch('/api/summarize', {
         method: 'POST',
         body: JSON.stringify({ text }),
@@ -81,15 +79,10 @@ const GeneratePage = () => {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      // Set the stream URL for the SummaryPreviewModal
-      setSummaryStreamUrl('/api/summarize');
       setIsSummaryModalOpen(true);
     } catch (error) {
       console.error("Error initiating summary generation:", error);
       setError(error instanceof Error ? error.message : 'An unknown error occurred');
-      setSummaryStreamUrl(null);
-    } finally {
-      setIsSummaryLoading(false);
     }
   };
 
@@ -197,7 +190,8 @@ const GeneratePage = () => {
             onSave={(name, summary) => handleSave(name, "summary", summary)}
             onRegenerate={generateSummary}
             isLoading={isSummaryLoading}
-            text={text}  // Pass the text to summarize here
+            onLoadingComplete={() => setIsSummaryLoading(false)}
+            text={text}
           />
         </div>
       </div>

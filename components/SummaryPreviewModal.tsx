@@ -9,6 +9,7 @@ interface SummaryPreviewModalProps {
   onSave: (name: string, summary: string) => void;
   onRegenerate: () => void;
   isLoading: boolean;
+  onLoadingComplete: () => void;
   text: string;
 }
 
@@ -18,6 +19,7 @@ const SummaryPreviewModal: React.FC<SummaryPreviewModalProps> = ({
   onSave,
   onRegenerate,
   isLoading,
+  onLoadingComplete,
   text,
 }) => {
   const [name, setName] = useState('');
@@ -28,7 +30,7 @@ const SummaryPreviewModal: React.FC<SummaryPreviewModalProps> = ({
   const summaryContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (isOpen && text) {
+    if (isOpen && text && isLoading) {
       setSummary('');
       setError(null);
       abortControllerRef.current = new AbortController();
@@ -83,13 +85,16 @@ const SummaryPreviewModal: React.FC<SummaryPreviewModalProps> = ({
             setError('Failed to load summary. Please try again.');
             console.error("Error during streaming:", err);
           }
+        })
+        .finally(() => {
+          onLoadingComplete();
         });
     }
 
     return () => {
       abortControllerRef.current?.abort();
     };
-  }, [isOpen, text]);
+  }, [isOpen, text, isLoading, onLoadingComplete]);
 
   if (!isOpen) return null;
 
@@ -105,23 +110,15 @@ const SummaryPreviewModal: React.FC<SummaryPreviewModalProps> = ({
   };
 
   const formatSummary = (text: string) => {
-    // Replace [important] tags with styled spans
     let formattedText = text.replace(
       /\[important\](.*?)\[\/important\]/g, 
       '<span class="bg-blue-100 text-black px-1 rounded font-semibold">$1</span>'
     );
-  
-    // Convert markdown-style headings to HTML headings with classes
     formattedText = formattedText.replace(/^### (.*$)/gim, '<h3 class="text-lg font-bold mt-3 mb-1 text-blue-400">$1</h3>');
     formattedText = formattedText.replace(/^## (.*$)/gim, '<h2 class="text-xl font-bold mt-4 mb-2 text-blue-300">$1</h2>');
     formattedText = formattedText.replace(/^# (.*$)/gim, '<h1 class="text-2xl font-bold mt-5 mb-2 text-blue-200">$1</h1>');
-  
-    // Convert **bold** to <strong> tags
     formattedText = formattedText.replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold">$1</strong>');
-  
-    // Convert line breaks to <br> tags
     formattedText = formattedText.replace(/\n/g, '<br>');
-  
     return formattedText;
   };
 

@@ -18,22 +18,16 @@ interface Flashcard {
   back: string;
 }
 
-interface Tab {
-  id: string;
-  label: string;
-}
-
 const GeneratePage = () => {
   const [text, setText] = useState("");
   const { isLoaded, isSignedIn, user } = useUser();
-  const [activeTab, setActiveTab] = useState("text");
   const [flashcards, setFlashcards] = useState<Flashcard[]>([]);
-  const [summary, setSummary] = useState("");
   const [isFlashcardModalOpen, setIsFlashcardModalOpen] = useState(false);
   const [isSummaryModalOpen, setIsSummaryModalOpen] = useState(false);
   const [isFlashcardLoading, setIsFlashcardLoading] = useState(false);
   const [isSummaryLoading, setIsSummaryLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [summaryStreamUrl, setSummaryStreamUrl] = useState<string | null>(null);
 
   if (!isLoaded || !isSignedIn) {
     return <LoadingSpinner />;
@@ -76,6 +70,7 @@ const GeneratePage = () => {
     console.log("Generating: summary");
 
     try {
+      // Instead of fetching the entire summary, we're just initiating the summarization process
       const response = await fetch('/api/summarize', {
         method: 'POST',
         body: JSON.stringify({ text }),
@@ -86,23 +81,19 @@ const GeneratePage = () => {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      const data = await response.json();
-      console.log("Received summary data:", data);
-      if (!data.summary) {
-        throw new Error("No summary received from API");
-      }
-      setSummary(data.summary);
+      // Set the stream URL for the SummaryPreviewModal
+      setSummaryStreamUrl('/api/summarize');
       setIsSummaryModalOpen(true);
     } catch (error) {
-      console.error("Error generating summary:", error);
+      console.error("Error initiating summary generation:", error);
       setError(error instanceof Error ? error.message : 'An unknown error occurred');
-      setSummary("");
+      setSummaryStreamUrl(null);
     } finally {
       setIsSummaryLoading(false);
     }
   };
 
-  const handleSave = async (name: string, type: "flashcards" | "summary") => {
+  const handleSave = async (name: string, type: "flashcards" | "summary", content: any) => {
     if (!user) {
       console.error('User not authenticated');
       return;
@@ -127,19 +118,23 @@ const GeneratePage = () => {
 
     const colRef = collection(userDocRef, name);
     if (type === "flashcards") {
-      flashcards.forEach((flashcard: Flashcard) => {
+      content.forEach((flashcard: Flashcard) => {
         const cardDocRef = doc(colRef);
         batch.set(cardDocRef, flashcard);
       });
     } else {
       const summaryDocRef = doc(colRef, 'summary');
-      batch.set(summaryDocRef, { content: summary });
+      batch.set(summaryDocRef, { content });
     }
 
     try {
       await batch.commit();
       console.log(`${type} saved successfully`);
-      setIsFlashcardModalOpen(false);
+      if (type === "flashcards") {
+        setIsFlashcardModalOpen(false);
+      } else {
+        setIsSummaryModalOpen(false);
+      }
     } catch (error) {
       console.error(`Error saving ${type}:`, error);
       setError(error instanceof Error ? error.message : 'An unknown error occurred while saving');
@@ -190,7 +185,7 @@ const GeneratePage = () => {
             isOpen={isFlashcardModalOpen}
             onClose={() => setIsFlashcardModalOpen(false)}
             items={flashcards}
-            onSave={(name) => handleSave(name, "flashcards")}
+            onSave={(name) => handleSave(name, "flashcards", flashcards)}
             onRegenerate={generateFlashcards}
             isLoading={isFlashcardLoading}
             title="Flashcard Preview"
@@ -199,11 +194,10 @@ const GeneratePage = () => {
           <SummaryPreviewModal
             isOpen={isSummaryModalOpen}
             onClose={() => setIsSummaryModalOpen(false)}
-            summary={summary}
-            error={error}
-            onSave={(name) => handleSave(name, "summary")}
+            onSave={(name, summary) => handleSave(name, "summary", summary)}
             onRegenerate={generateSummary}
             isLoading={isSummaryLoading}
+            text={text}  // Pass the text to summarize here
           />
         </div>
       </div>

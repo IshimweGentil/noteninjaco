@@ -121,16 +121,20 @@ const StudySetPage = () => {
     // Replace [important] tags with styled spans
     let formattedText = text.replace(
       /\[important\](.*?)\[\/important\]/g, 
-      '<span class="bg-blue-100  text-black px-1 rounded font-semibold">$1</span>'
+      '<span class="bg-blue-100 text-black px-1 rounded font-semibold">$1</span>'
     );
-
+  
     // Convert markdown-style headings to HTML headings with classes
+    formattedText = formattedText.replace(/^### (.*$)/gim, '<h3 class="text-lg font-bold mt-3 mb-1 text-blue-400">$1</h3>');
     formattedText = formattedText.replace(/^## (.*$)/gim, '<h2 class="text-xl font-bold mt-4 mb-2 text-blue-300">$1</h2>');
-    formattedText = formattedText.replace(/^# (.*$)/gim, '<h1 class="text-2xl font-bold mt-6 mb-3 text-blue-200">$1</h1>');
-
+    formattedText = formattedText.replace(/^# (.*$)/gim, '<h1 class="text-2xl font-bold mt-5 mb-2 text-blue-200">$1</h1>');
+  
+    // Convert **bold** to <strong> tags
+    formattedText = formattedText.replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold">$1</strong>');
+  
     // Convert line breaks to <br> tags
     formattedText = formattedText.replace(/\n/g, '<br>');
-
+  
     return formattedText;
   };
 

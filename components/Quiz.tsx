@@ -48,6 +48,16 @@ const Quiz: React.FC<QuizProps> = ({ quiz }) => {
             </ul>
           )}
 
+          {/* Render textarea for short-answer quiz */}
+          {question.type === 'sa' && (
+            <textarea
+              disabled={isSubmitted}
+              className="resize-none text-black mt-2 w-full p-2 border border-gray-300 rounded overflow-y-auto"
+              rows={3}
+              placeholder="Your answer"
+            />
+          )}
+
           {/* Render answer for short-answer quiz */}
           {question.type === 'sa' && isSubmitted && question.answer && (
             <p className="italic text-purple-600 mt-4"><strong>Correct Answer: </strong><span>{question.answer}</span></p>
@@ -55,9 +65,7 @@ const Quiz: React.FC<QuizProps> = ({ quiz }) => {
 
           {/* Render answer for multiple-choice and select-all questions */}
           {question.type === 'mc' && isSubmitted && question.answers && (
-            <div className="flex flex-row">
-              <p className="text-purple-600"><strong>Correct Answer: </strong><span>{Array.isArray(question.answers) ? question.answers.join(', ') : question.answers}</span></p>
-            </div>
+            <p className="text-purple-600"><strong>Correct Answer: </strong><span>{Array.isArray(question.answers) ? question.answers.join(', ') : question.answers}</span></p>
           )}
         </div>
       ))}
@@ -68,7 +76,7 @@ const Quiz: React.FC<QuizProps> = ({ quiz }) => {
           onClick={handleSubmit}
           className="px-4 py-2 bg-blue-500 text-white font-semibold rounded hover:bg-blue-600"
         >
-          Submit
+          {!isSubmitted ? `Submit` : `Hide Answers`}
         </button>
       </div>
     </div>

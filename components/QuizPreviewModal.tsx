@@ -3,7 +3,6 @@ import { XIcon, ArrowRight, Loader2, CheckCircle } from 'lucide-react';
 import { motion, AnimatePresence } from "framer-motion";
 import MagicButton from './ui/MagicButton'; // Ensure this is correctly defined
 import { Question } from '@/types/quiz'; // Make sure this path is correct
-import Quiz from "@/components/Quiz"
 
 interface QuizPreviewModalProps {
   isOpen: boolean;

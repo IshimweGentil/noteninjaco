@@ -16,6 +16,7 @@ interface ChatProps {
   closeChat?: () => void;
   className?: string;
 }
+
 interface Message {
   id: string;
   role: "function" | "assistant" | "system" | "user" | "data" | "tool";
@@ -27,14 +28,14 @@ export function ProjectChat({ className, isVisible, setIsVisible, closeChat }: C
     {
       id: "1",
       role: "assistant",
-      content: "Hello! I am the Project Chatbot. How can I assist you today?",
+      content: "Hello! I am your study buddy. If you need help, talk to me!",
     },
   ]);
 
   const [parsedMessages, setParsedMessages] = useState<{ [key: string]: string }>({});
 
   const { messages, input, handleInputChange, handleSubmit, setMessages } = useChat({
-    api: "api/chat",
+    api: "/api/project_chat",
     onError: (e) => {
       console.log(e);
     },
@@ -51,6 +52,10 @@ export function ProjectChat({ className, isVisible, setIsVisible, closeChat }: C
   }, [persistentMessages, setMessages]);
 
   useEffect(() => {
+    console.log(persistentMessages)
+  }, [persistentMessages, setMessages]);
+
+  useEffect(() => {
     const parseMessages = async () => {
       const parsed: { [key: string]: string } = {};
       for (const message of persistentMessages) {
@@ -64,7 +69,7 @@ export function ProjectChat({ className, isVisible, setIsVisible, closeChat }: C
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (chatRef.current && !chatRef.current.contains(event.target as Node)) {
-        if (closeChat) closeChat();
+        closeChat?.();
       }
     };
 
@@ -116,15 +121,15 @@ export function ProjectChat({ className, isVisible, setIsVisible, closeChat }: C
     >
       <div className="flex flex-col h-full">
         <div className="flex-1 overflow-y-auto p-3">
-          {persistentMessages.map((message, index) => {
+          {persistentMessages.map((message) => {
             const isUser = message.role === "user";
             return (
               <div
-                key={index}
+                key={message.id}  // Use unique ID here
                 className={`flex items-start mb-2 ${isUser ? 'justify-end' : 'justify-start'} transition-transform duration-300 hover:scale-105`}
               >
                 {!isUser && (
-                  <div className="mr-2 w-6 h-6 flex items-center justify-center ">
+                  <div className="mr-2 w-6 h-6 flex items-center justify-center">
                     <Icon icon="mingcute:ai-fill" width="24" height="24" className="text-blue-100" />
                   </div>
                 )}

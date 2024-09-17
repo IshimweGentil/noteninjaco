@@ -261,7 +261,7 @@ const StudySetPage = () => {
           <Tabs tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} />
         </div>
       )}
-      <h1 className="text-2xl mt-4 font-bold mb-6">Studying: {setName}</h1>
+      <h1 className="text-2xl mt-4 font-bold mb-6">{setType[0].toUpperCase() + setType.slice(1)}: {setName[0].toUpperCase() + setName.slice(1)}</h1>
       <div className="mt-6">
         {setType === 'flashcards' 
           ? (activeTab === 'grid' ? renderGridView() : renderSingleCardView())
@@ -278,7 +278,7 @@ const StudySetPage = () => {
           onClick={() => router.push('/dashboard/study')}
         >
           <BackIcon className="h-5 w-5 mr-2" />
-          Back to Flashcard Sets
+          Back to Study Sets
         </div>
       </div>
       {/* <ChatButton onClick={toggleVisibility} isVisible={isVisible} />

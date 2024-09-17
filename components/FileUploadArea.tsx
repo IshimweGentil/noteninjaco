@@ -4,9 +4,10 @@ import { IconClearAll, IconFileX, IconFile } from "@tabler/icons-react";
 
 interface FileUploadAreaProps {
   setText: React.Dispatch<React.SetStateAction<string>>;
+  className?: string;
 }
 
-const FileUploadArea: React.FC<FileUploadAreaProps> = ({ setText }) => {
+const FileUploadArea: React.FC<FileUploadAreaProps> = ({ setText, className }) => {
   const [files, setFiles] = useState<File[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -58,7 +59,7 @@ const FileUploadArea: React.FC<FileUploadAreaProps> = ({ setText }) => {
   };
 
   return (
-    <div className="border-gray-600">
+    <div className={`border-gray-600 ${className}`}>
       <input
         type="file"
         ref={fileInputRef}

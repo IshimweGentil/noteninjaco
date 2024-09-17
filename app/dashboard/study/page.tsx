@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from 'react';
 import { useUser } from '@clerk/nextjs';
-import { useRouter } from 'next/navigation';
 import { db } from '@/firebase';
 import { collection, doc, getDoc, setDoc, deleteDoc, getDocs, writeBatch } from 'firebase/firestore';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
@@ -17,7 +16,6 @@ const StudyPage: React.FC = () => {
   const { isLoaded, isSignedIn, user } = useUser();
   const [flashcardSets, setFlashcardSets] = useState<FlashcardSet[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const router = useRouter();
 
   useEffect(() => {
     async function getFlashcardSets() {
@@ -89,7 +87,7 @@ const StudyPage: React.FC = () => {
 
   const hoverEffectItems = flashcardSets.map(set => ({
     title: set.name,
-    description: `${set.name} set`,
+    description: set.type ?? '',
     link: `/dashboard/study/${encodeURIComponent(set.name)}`
   }));
 

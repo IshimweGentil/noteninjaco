@@ -16,7 +16,6 @@ import { Question } from '@/types/quiz';
 import TextTab from "@/components/TextTab";
 import FileUploadArea from "@/components/FileUploadArea";
 
-
 interface Flashcard {
   front: string;
   back: string;
@@ -33,16 +32,17 @@ const GeneratePage = () => {
   const [activeTab, setActiveTab] = useState("text");
   const [flashcards, setFlashcards] = useState<Flashcard[]>([]);
   const [summary, setSummary] = useState("");
-  const [quiz, setQuiz] = useState<Question[]>([]); // Use Question type for quiz
+  const [quiz, setQuiz] = useState<Question[]>([]);
   const [isFlashcardModalOpen, setIsFlashcardModalOpen] = useState(false);
   const [isSummaryModalOpen, setIsSummaryModalOpen] = useState(false);
-  const [isQuizModalOpen, setIsQuizModalOpen] = useState(false); // Add quiz modal state
+  const [isQuizModalOpen, setIsQuizModalOpen] = useState(false);
   const [isFlashcardLoading, setIsFlashcardLoading] = useState(false);
   const [isSummaryLoading, setIsSummaryLoading] = useState(false);
-  const [isQuizLoading, setIsQuizLoading] = useState(false); // Add quiz loading state
+  const [isQuizLoading, setIsQuizLoading] = useState(false);
   const [projectTitle, setProjectTitle] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [projectNames, setProjectNames] = useState<string[]>([]);
+  const [format, setFormat] = useState('');
 
   useEffect(() => {
     const getNames = async () => {
@@ -62,105 +62,29 @@ const GeneratePage = () => {
     return <LoadingSpinner />;
   }
 
-  const generateFlashcards = async () => {
+  const generateContent = async (endpoint: string, setData: React.Dispatch<React.SetStateAction<any>>, setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>, setLoading: React.Dispatch<React.SetStateAction<boolean>>) => {
     if (text.trim() === "") return;
-    setIsFlashcardLoading(true);
+    setLoading(true);
     setError(null);
-    console.log("Generating: flashcards");
 
     try {
-      const response = await fetch("/api/generate", {
+      const response = await fetch(endpoint, {
         method: "POST",
         body: JSON.stringify({ text }),
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
       });
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const data = await response.json();
-      console.log("Received flashcard data:", data);
-      setFlashcards(data);
-      setIsFlashcardModalOpen(true);
+      setData(data);
+      setIsModalOpen(true);
     } catch (error) {
-      console.error("Error generating flashcards:", error);
-      setError(
-        error instanceof Error ? error.message : "An unknown error occurred"
-      );
-      setFlashcards([]);
+      console.error(`Error generating content:`, error);
+      setError(error instanceof Error ? error.message : "An unknown error occurred");
     } finally {
-      setIsFlashcardLoading(false);
-    }
-  };
-
-  const generateSummary = async () => {
-    if (text.trim() === "") return;
-    setIsSummaryLoading(true);
-    setError(null);
-    console.log("Generating: summary");
-
-    try {
-      const response = await fetch("/api/summarize", {
-        method: "POST",
-        body: JSON.stringify({ text }),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      const data = await response.json();
-      console.log("Received summary data:", data);
-      if (!data.summary) {
-        throw new Error("No summary received from API");
-      }
-      setSummary(data.summary);
-      setIsSummaryModalOpen(true);
-    } catch (error) {
-      console.error("Error generating summary:", error);
-      setError(
-        error instanceof Error ? error.message : "An unknown error occurred"
-      );
-      setSummary("");
-    } finally {
-      setIsSummaryLoading(false);
-    }
-  };
-
-  const generateQuiz = async () => {
-    if (text.trim() === "") return;
-    setIsQuizLoading(true);
-    setError(null);
-    console.log("Generating: quiz");
-
-    try {
-      const response = await fetch("/api/quiz", {
-        method: "POST",
-        body: JSON.stringify({ text }),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      const data = await response.json();
-      console.log("Received quiz data:", data);
-      console.log(data.quiz);
-      if (!data) {
-        throw new Error("No quiz received from API");
-      }
-      setQuiz(data);
-      setIsQuizModalOpen(true); // Open the quiz modal
-    } catch (error) {
-      console.error("Error generating quiz:", error);
-      setError(
-        error instanceof Error ? error.message : "An unknown error occurred"
-      );
-    } finally {
-      setIsQuizLoading(false);
+      setLoading(false);
     }
   };
 
@@ -169,15 +93,15 @@ const GeneratePage = () => {
       console.error("User not authenticated");
       return;
     }
-  
+
     setProjectTitle(name);
-  
+
     const batch = writeBatch(db);
     const userDocRef = doc(collection(db, "users"), user.id);
-  
+
     try {
       const docSnap = await getDoc(userDocRef);
-  
+
       // Create/merge flashcards
       if (docSnap.exists()) {
         const collections = docSnap.data().flashcards || [];
@@ -186,7 +110,7 @@ const GeneratePage = () => {
       } else {
         batch.set(userDocRef, { flashcards: [{ name, type }] });
       }
-  
+
       // Save flashcards/summary/quiz
       const colRef = collection(userDocRef, name);
       if (type === "flashcards") {
@@ -203,10 +127,10 @@ const GeneratePage = () => {
           batch.set(questionDocRef, question);
         });
       }
-  
+
       // Commit batch
       await batch.commit();
-  
+
       // Close modals based on type
       if (type === "flashcards") {
         setIsFlashcardModalOpen(false);
@@ -214,7 +138,7 @@ const GeneratePage = () => {
         setIsSummaryModalOpen(false);
       } else if (type === "quiz") {
         setIsQuizModalOpen(false);
-      }      
+      }
     } catch (error) {
       console.error(`Error saving ${type}:`, error);
       setError(
@@ -225,36 +149,43 @@ const GeneratePage = () => {
     }
   };
 
+  const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setFormat(e.target.value);
+  };
+
   return (
     <div className="flex flex-col min-h-screen">
       <div className="flex-grow container mx-auto px-4 py-2">
         <h1 className="mb-4 font-bold text-xl">Welcome, {user.firstName || "User"}!</h1>
         <div>
           <TextTab text={text} setText={setText} AudioTab={AudioTab} />
-          <div className="mt-4">
-            <FileUploadArea setText={setText} />
+          <div className="flex flex-col gap-2">
+            <label htmlFor="subject-format-select">Study Format:</label>
+            <select
+              className="p-1 w-fit text-black"
+              name="subject-format"
+              id="subject-format-select"
+              value={format}
+              onChange={handleChange}
+            >
+              <option value="" disabled>--Select format--</option>
+              <option value="flashcards">Flashcards</option>
+              <option value="summary">Summary</option>
+              <option value="quiz">Quiz</option>
+            </select>
+            <FileUploadArea className="mt-2" setText={setText} />
           </div>
           <div className="flex flex-col sm:flex-row justify-start space-y-2 sm:space-y-0 sm:space-x-4 mt-4">
             <MagicButton
-              title={isFlashcardLoading ? "Generating..." : "Generate Flashcards"}
-              icon={isFlashcardLoading ? <Loader2 className="animate-spin" size={16} /> : <ArrowRight size={16} />}
+              title={(isQuizLoading || isSummaryLoading || isFlashcardLoading) ? "Generating..." : `Generate ${format && (format[0].toUpperCase() + format.slice(1))}`}
+              icon={(isQuizLoading || isSummaryLoading || isFlashcardLoading) ? <Loader2 className="animate-spin" size={16} /> : <ArrowRight size={16} />}
               position="right"
-              onClick={generateFlashcards}
-              disabled={isFlashcardLoading || isSummaryLoading || isQuizLoading || text.trim() === ""}
-            />
-            <MagicButton
-              title={isSummaryLoading ? "Generating..." : "Generate Summary"}
-              icon={isSummaryLoading ? <Loader2 className="animate-spin" size={16} /> : <ArrowRight size={16} />}
-              position="center"
-              onClick={generateSummary}
-              disabled={isFlashcardLoading || isSummaryLoading || isQuizLoading || text.trim() === ""}
-            />
-            <MagicButton
-              title={isQuizLoading ? "Generating..." : "Generate Quiz"}
-              icon={isQuizLoading ? <Loader2 className="animate-spin" size={16} /> : <ArrowRight size={16} />}
-              position="right"
-              onClick={generateQuiz}
-              disabled={isFlashcardLoading || isSummaryLoading || isQuizLoading || text.trim() === ""}
+              onClick={() => {
+                if (format === "quiz") return generateContent("/api/quiz", setQuiz, setIsQuizModalOpen, setIsQuizLoading);
+                if (format === "flashcards") return generateContent("/api/generate", setFlashcards, setIsFlashcardModalOpen, setIsFlashcardLoading);
+                if (format === "summary") return generateContent("/api/summarize", setSummary, setIsSummaryModalOpen, setIsSummaryLoading);
+              }}
+              disabled={!text || !format || isFlashcardLoading || isSummaryLoading || isQuizLoading || text.trim() === ""}
             />
           </div>
 
@@ -263,7 +194,7 @@ const GeneratePage = () => {
             onClose={() => setIsFlashcardModalOpen(false)}
             items={flashcards}
             onSave={(name) => handleSave(name, "flashcards")}
-            onRegenerate={generateFlashcards}
+            onRegenerate={() => generateContent("/api/generate", setFlashcards, setIsFlashcardModalOpen, setIsFlashcardLoading)}
             isLoading={isFlashcardLoading}
             title="Flashcard Preview"
             projectNames={projectNames}
@@ -275,7 +206,7 @@ const GeneratePage = () => {
             summary={summary}
             error={error}
             onSave={(name) => handleSave(name, "summary")}
-            onRegenerate={generateSummary}
+            onRegenerate={() => generateContent("/api/summarize", setSummary, setIsSummaryModalOpen, setIsSummaryLoading)}
             isLoading={isSummaryLoading}
             projectNames={projectNames}
           />
@@ -285,7 +216,7 @@ const GeneratePage = () => {
             onClose={() => setIsQuizModalOpen(false)}
             quiz={quiz}
             onSave={(name) => handleSave(name, "quiz")}
-            onRegenerate={generateQuiz}
+            onRegenerate={() => generateContent("/api/quiz", setQuiz, setIsQuizModalOpen, setIsQuizLoading)}
             isLoading={isQuizLoading}
             projectNames={projectNames}
           />

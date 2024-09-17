@@ -2,9 +2,6 @@
 
 import React, { useState, useEffect } from "react";
 import { useUser } from "@clerk/nextjs";
-import Tabs from "@/components/Tabs";
-import FileTab from "@/components/FileTab";
-import TextTab from "@/components/TextTab";
 import AudioTab from "@/components/AudioTab";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import { db } from "@/firebase";
@@ -30,7 +27,7 @@ interface Tab {
 const GeneratePage = () => {
   const [text, setText] = useState("");
   const { isLoaded, isSignedIn, user } = useUser();
-  const [activeTab, setActiveTab] = useState("file");
+  const [activeTab, setActiveTab] = useState("text");
   const [flashcards, setFlashcards] = useState<Flashcard[]>([]);
   const [summary, setSummary] = useState("");
   const [quiz, setQuiz] = useState<Question[]>([]); // Use Question type for quiz
@@ -61,12 +58,6 @@ const GeneratePage = () => {
   if (!isLoaded || !isSignedIn) {
     return <LoadingSpinner />;
   }
-
-  const tabs: Tab[] = [
-    { id: "file", label: "Files" },
-    { id: "text", label: "Text" },
-    { id: "audio", label: "Audio" },
-  ];
 
   const generateFlashcards = async () => {
     if (text.trim() === "") return;
@@ -233,20 +224,14 @@ const GeneratePage = () => {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <div className="border-b border-slate-700">
-        <div className="container mx-auto px-4">
-          <Tabs tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} />
-        </div>
-      </div>
-      <div className="flex-grow container mx-auto px-4 py-6">
-        <h1 className="mb-2">Welcome, {user.firstName || "User"}!</h1>
-        <div className="mt-2">
-          {activeTab === "file" && <FileTab text={text} setText={setText} />}
-          {activeTab === "text" && <TextTab text={text} setText={setText} />}
-          {activeTab === "audio" && <AudioTab text={text} setText={setText} />}
-        </div>
+      <div className="flex-grow container mx-auto px-4 py-2">
+        <h1 className="mb-4 font-bold text-xl">Welcome, {user.firstName || "User"}!</h1>
         <div>
-          <div className="flex justify-start space-x-4">
+          <TextTab text={text} setText={setText} AudioTab={AudioTab} />
+          <div className="mt-4">
+            <FileUploadArea setText={setText} />
+          </div>
+          <div className="flex flex-col sm:flex-row justify-start space-y-2 sm:space-y-0 sm:space-x-4 mt-4">
             <MagicButton
               title={isFlashcardLoading ? "Generating..." : "Generate Flashcards"}
               icon={isFlashcardLoading ? <Loader2 className="animate-spin" size={16} /> : <ArrowRight size={16} />}

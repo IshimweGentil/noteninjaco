@@ -281,6 +281,8 @@ const StudySetPage = () => {
           Back to Flashcard Sets
         </div>
       </div>
+      {/* <ChatButton onClick={toggleVisibility} isVisible={isVisible} />
+      {isVisible && <Chat isVisible={isVisible} setIsVisible={setIsVisible} closeChat={closeChat} />} */}
     </div>
   );
 };

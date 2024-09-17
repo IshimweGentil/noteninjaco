@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Question } from '@/types/quiz';
 
-const Quiz = ({ quiz }: { quiz: Question[] }) => {
+const Quiz = ({ quiz }: { quiz: Question[] | null }) => {
   const [isSubmitted, setIsSubmitted] = useState(false);
 
   // Handle submit button click

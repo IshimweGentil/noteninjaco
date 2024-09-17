@@ -37,7 +37,7 @@ export async function POST(req: Request) {
         { role: "system", content: systemPrompt },
         { role: "user", content: text },
       ],
-      model: "gpt-4-1106-preview",
+      model: "gpt-4o-mini",
     });
 
     const summary = completion.choices[0].message.content;

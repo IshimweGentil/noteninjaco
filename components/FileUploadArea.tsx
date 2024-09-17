@@ -1,7 +1,6 @@
-import React, { useState, useCallback } from "react";
-import { useDropzone } from "react-dropzone";
+import React, { useState, useRef } from "react";
 import { filterFiles, parseFiles } from "@/utils/fileUtil";
-import { IconClearAll, IconFileX } from "@tabler/icons-react";
+import { IconClearAll, IconFileX, IconFile } from "@tabler/icons-react";
 
 interface FileUploadAreaProps {
   setText: React.Dispatch<React.SetStateAction<string>>;
@@ -12,20 +11,19 @@ const FileUploadArea: React.FC<FileUploadAreaProps> = ({ setText }) => {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const onDrop = useCallback((acceptedFiles: File[]) => {
-    setFiles((prevFiles) => [...prevFiles, ...acceptedFiles]);
-    setError(null);
-    setMessage(null);
-  }, []);
-
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop,
-    accept: {
-      'application/pdf': ['.pdf'],
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx'],
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files) {
+      setFiles((prevFiles) => [...prevFiles, ...Array.from(event.target.files!)]);
+      setError(null);
+      setMessage(null);
     }
-  });
+  };
+
+  const handleUploadClick = () => {
+    fileInputRef.current?.click();
+  };
 
   const handleFiles = async () => {
     setError(null);
@@ -40,7 +38,6 @@ const FileUploadArea: React.FC<FileUploadAreaProps> = ({ setText }) => {
       }
 
       const extractedText = await parseFiles(supportedFiles);
-      console.log("Extracted text:", extractedText);
       if (extractedText === 'No text could be extracted from the file(s).') {
         setMessage(extractedText);
       } else {
@@ -62,22 +59,30 @@ const FileUploadArea: React.FC<FileUploadAreaProps> = ({ setText }) => {
 
   return (
     <div className="border-gray-600">
-      <div
-        {...getRootProps()}
-        className="border-2 border-dashed border-gray-600 rounded-lg p-12 text-center cursor-pointer flex items-center justify-center h-64 mb-4"
+      <input
+        type="file"
+        ref={fileInputRef}
+        onChange={handleFileChange}
+        accept=".pdf,.docx"
+        multiple
+        className="hidden"
+      />
+      <button
+        onClick={handleUploadClick}
+        className="inline-flex h-12 w-full sm:w-60 items-center justify-center rounded-lg border border-gray-600 text-sm font-medium text-white gap-2 hover:bg-gray-800 transition-colors"
       >
-        <input {...getInputProps()} />
-        <p>{isDragActive ? "Drop the files here..." : "Drag and drop some files here, or click to select files"}</p>
-      </div>
+        Upload File
+        <IconFile size={24} strokeWidth={1} />
+      </button>
 
       {error && (
-        <div className="text-red-500 mt-2">
+        <div className="text-red-500 mt-2 text-sm">
           {error}
         </div>
       )}
 
       {message && (
-        <div className="text-green-500 mt-2">
+        <div className="text-green-500 mt-2 text-sm">
           {message}
         </div>
       )}
@@ -85,36 +90,29 @@ const FileUploadArea: React.FC<FileUploadAreaProps> = ({ setText }) => {
       {files.length > 0 && (
         <>
           <button
-            className="flex mb-2 mt-4 cursor-pointer border rounded-lg py-1 px-2 border-white hover:opacity-70"
-            onClick={(e) => {
-              e.preventDefault();
-              setFiles([]);
-            }}
+            className="flex mb-2 mt-4 cursor-pointer border rounded-lg py-1 px-2 border-gray-700 hover:bg-gray-900 text-xs"
+            onClick={() => setFiles([])}
           >
-            <IconClearAll />
+            <IconClearAll size={16} />
             <span className="ml-2">Clear All</span>
           </button>
-          <ul className="flex flex-col border border-gray-500 rounded-lg overflow-hidden">
+          <ul className="flex flex-col border border-gray-600 bg-gray-800 rounded-lg overflow-hidden">
             {files.map((file, index) => (
               <li
                 key={`${file.name}-${index}`}
                 className="flex justify-between items-center border-b border-gray-500 last:border-b-0 p-2"
               >
-                <p>{file.name}</p>
+                <p className="text-sm truncate">{file.name}</p>
                 <IconFileX
                   className="cursor-pointer hover:scale-105 hover:opacity-70"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setFiles((files) =>
-                      files.filter((f) => f.name !== file.name)
-                    );
-                  }}
+                  size={16}
+                  onClick={() => setFiles(files.filter((f) => f.name !== file.name))}
                 />
               </li>
             ))}
           </ul>
           <button
-            className="mt-4 mb-4 cursor-pointer bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 disabled:opacity-50"
+            className="mt-4 mb-4 cursor-pointer bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 disabled:opacity-50 text-sm w-full sm:w-auto"
             onClick={handleFiles}
             disabled={isLoading}
           >

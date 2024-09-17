@@ -23,7 +23,7 @@ const Quiz = ({ quiz }: { quiz: Question[] | null }) => {
   return (
     <div className="max-w-4xl mx-auto p-6">
       {isSubmitted && <p className="text-red-500 mb-2">Answers from AI may not be correct.</p>}
-      {quiz.map((question, index) => (
+      {quiz && quiz.map((question, index) => (
         <div key={index} className="mb-6">
           <h3 className="text-lg font-semibold">Question {index + 1}:</h3>
           <p className="mt-2">{question.question}</p>
@@ -33,8 +33,14 @@ const Quiz = ({ quiz }: { quiz: Question[] | null }) => {
             <ul className="list-none mt-4">
               {question.options.map((option, idx) => (
                 <li key={idx} className="mb-2">
-                  <label className="flex items-center">
-                    <input type="radio" disabled={isSubmitted} className="mr-1 self-start mt-[0.33rem]" />
+                  <label className="flex items-center" htmlFor={`radio-${index}-${idx}`}>
+                    <input
+                      type="radio"
+                      name={`question-${index}`}
+                      id={`radio-${index}-${idx}`}
+                      disabled={isSubmitted}
+                      className="mr-2"
+                    />
                     {`${convertNumberToChar(idx)}) ${option}`}
                   </label>
                 </li>
@@ -47,8 +53,13 @@ const Quiz = ({ quiz }: { quiz: Question[] | null }) => {
             <ul className="list-none mt-4">
               {question.options.map((option, idx) => (
                 <li key={idx} className="mb-2">
-                  <label className="flex items-center">
-                    <input type="checkbox" disabled={isSubmitted} className="mr-1 self-start mt-[0.33rem]" />
+                  <label className="flex items-center" htmlFor={`checkbox-${index}-${idx}`}>
+                    <input
+                      type="checkbox"
+                      id={`checkbox-${index}-${idx}`}
+                      disabled={isSubmitted}
+                      className="mr-2"
+                    />
                     {`${convertNumberToChar(idx)}) ${option}`}
                   </label>
                 </li>
@@ -68,7 +79,9 @@ const Quiz = ({ quiz }: { quiz: Question[] | null }) => {
 
           {/* Renders an answer for each question when submitted */}
           {isSubmitted && question.answer && (
-            <p className="italic text-purple-600 mt-4"><strong>Correct Answer: </strong><span>{question.answer}</span></p>
+            <p className="italic text-purple-600 mt-4">
+              <strong>Correct Answer: </strong><span>{question.answer}</span>
+            </p>
           )}
         </div>
       ))}

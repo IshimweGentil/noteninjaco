@@ -3,6 +3,7 @@ import { XIcon, ArrowRight, Loader2, CheckCircle } from 'lucide-react';
 import { motion, AnimatePresence } from "framer-motion";
 import MagicButton from './ui/MagicButton'; // Ensure this is correctly defined
 import { Question } from '@/types/quiz'; // Make sure this path is correct
+import Quiz from "@/components/Quiz"
 
 interface QuizPreviewModalProps {
   isOpen: boolean;
@@ -83,38 +84,12 @@ const QuizPreviewModal: React.FC<QuizPreviewModalProps> = ({
             </button>
             <h2 className="text-2xl font-bold text-blue-100 mb-4 text-center">{title}</h2>
 
-            {/* <motion.div
+            <motion.div
               className="mb-4"
               whileTap={{ scale: 0.95 }}
             >
-              <div
-                className="bg-slate-800 p-4 rounded-lg h-48 flex items-center justify-center cursor-pointer"
-                onClick={() => {}}
-              >
-                <div className="w-full h-full flex items-center justify-center">
-                  <p className="text-xl font-semibold text-center text-blue-100">
-                    <Quiz quiz={quiz} />
-                  </p>
-                </div>
-              </div>
-              <div className="flex justify-between mt-2">
-                <button
-                  onClick={handlePrevious}
-                  className="px-4 py-2 bg-slate-800 text-blue-100 rounded hover:bg-slate-700 transition-colors"
-                >
-                  Previous
-                </button>
-                <span className="text-blue-100 self-center">
-                  {currentIndex + 1} / {quiz.length}
-                </span>
-                <button
-                  onClick={handleNext}
-                  className="px-4 py-2 bg-slate-800 text-blue-100 rounded hover:bg-slate-700 transition-colors"
-                >
-                  Next
-                </button>
-              </div>
-            </motion.div> */}
+              {quiz && <Quiz quiz={quiz} />}
+            </motion.div>
 
             <div className="mb-4">
               <input

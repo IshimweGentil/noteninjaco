@@ -10,9 +10,12 @@ import MagicButton from "@/components/ui/MagicButton";
 import { ArrowRight, Loader2 } from "lucide-react";
 import PreviewModal from "@/components/PreviewModal";
 import SummaryPreviewModal from "@/components/SummaryPreviewModal";
-import QuizPreviewModal from "@/components/QuizPreviewModal"; // Import QuizPreviewModal
+import QuizPreviewModal from "@/components/QuizPreviewModal";
 import { getProjectNames } from '@/utils/firebaseUtil';
-import { Question } from '@/types/quiz'; // Import Question type
+import { Question } from '@/types/quiz';
+import TextTab from "@/components/TextTab";
+import FileUploadArea from "@/components/FileUploadArea";
+
 
 interface Flashcard {
   front: string;

@@ -254,8 +254,8 @@ const StudySetPage = () => {
 
   return (
     <div className="container mx-auto px-4">
-      <ChatButton icon={<IconRobot size={28} />} onClick={toggleVisibility} isVisible={isChatVisible} />
-      {isChatVisible && <ProjectChat isVisible={isChatVisible} setIsVisible={setIsChatVisible} closeChat={closeChat} />}
+      {/* <ChatButton icon={<IconRobot size={28} />} onClick={toggleVisibility} isVisible={isChatVisible} />
+      {isChatVisible && <ProjectChat isVisible={isChatVisible} setIsVisible={setIsChatVisible} closeChat={closeChat} />} */}
       {setType === 'flashcards' && (
         <div className="mb-2">
           <Tabs tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} />

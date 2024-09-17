@@ -24,7 +24,6 @@ interface Flashcard {
 const GeneratePage = () => {
   const [text, setText] = useState("");
   const { isLoaded, isSignedIn, user } = useUser();
-  const [activeTab, setActiveTab] = useState("text");
   const [flashcards, setFlashcards] = useState<Flashcard[]>([]);
   const [summary, setSummary] = useState("");
   const [quiz, setQuiz] = useState<Question[]>([]);

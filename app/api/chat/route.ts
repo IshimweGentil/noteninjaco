@@ -9,7 +9,6 @@ import { HttpResponseOutputParser } from 'langchain/output_parsers';
 import { JSONLoader } from "langchain/document_loaders/fs/json";
 import { RunnableSequence } from '@langchain/core/runnables';
 import { formatDocumentsAsString } from 'langchain/util/document';
-import { CharacterTextSplitter } from 'langchain/text_splitter';
 import path from 'path';
 import fs from 'fs';
 

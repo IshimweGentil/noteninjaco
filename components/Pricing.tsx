@@ -20,7 +20,7 @@ const PricingCard: React.FC<PricingCardProps> = ({ title, price, features, isFre
       <ul className="text-left mb-6 relative z-20">
         {features.map((feature, index) => (
           <li key={index} className="flex items-center text-gray-300 mb-2">
-            <CheckIcon className="mr-2" /> {/* Adjust icon spacing */}
+            <CheckIcon className="mr-2" />
             <span>{feature}</span>
           </li>
         ))}
@@ -76,7 +76,11 @@ const Pricing: React.FC = () => {
   );
 };
 
-const CheckIcon: React.FC = () => {
+interface CheckIconProps {
+  className?: string;
+}
+
+const CheckIcon: React.FC<CheckIconProps> = ({ className }) => {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -84,7 +88,7 @@ const CheckIcon: React.FC = () => {
       height="24"
       viewBox="0 0 24 24"
       fill="currentColor"
-      className="h-4 w-4 text-gray-400 mr-2 flex-shrink-0"
+      className={`h-4 w-4 text-gray-400 flex-shrink-0 ${className}`}
     >
       <path stroke="none" d="M0 0h24v24H0z" fill="none" />
       <path

@@ -21,11 +21,6 @@ interface Flashcard {
   back: string;
 }
 
-interface Tab {
-  id: string;
-  label: string;
-}
-
 const GeneratePage = () => {
   const [text, setText] = useState("");
   const { isLoaded, isSignedIn, user } = useUser();

@@ -62,76 +62,139 @@ const GeneratePage = () => {
     return <LoadingSpinner />;
   }
 
-  const generateContent = async (endpoint: string, setData: React.Dispatch<React.SetStateAction<any>>, setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>, setLoading: React.Dispatch<React.SetStateAction<boolean>>) => {
+  const generateFlashcards = async () => {
     if (text.trim() === "") return;
-    setLoading(true);
+    setIsFlashcardLoading(true);
     setError(null);
+    console.log("Generating: flashcards");
 
     try {
-      const response = await fetch(endpoint, {
+      const response = await fetch("/api/generate", {
         method: "POST",
         body: JSON.stringify({ text }),
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+        },
       });
-
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const data = await response.json();
-      setData(data);
-      setIsModalOpen(true);
+      console.log("Received flashcard data:", data);
+      setFlashcards(data);
+      setIsFlashcardModalOpen(true);
     } catch (error) {
-      console.error(`Error generating content:`, error);
-      setError(error instanceof Error ? error.message : "An unknown error occurred");
+      console.error("Error generating flashcards:", error);
+      setError(
+        error instanceof Error ? error.message : "An unknown error occurred"
+      );
+      setFlashcards([]);
     } finally {
-      setLoading(false);
+      setIsFlashcardLoading(false);
     }
   };
 
-  const handleSave = async (name: string, type: "flashcards" | "summary" | "quiz") => {
+  const generateSummary = async () => {
+    if (text.trim() === '') return;
+    setIsSummaryLoading(true);
+    setError(null);
+    console.log("Generating: summary");
+
+    try {
+      const response = await fetch('/api/summarize', {
+        method: 'POST',
+        body: JSON.stringify({ text }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      setIsSummaryModalOpen(true);
+    } catch (error) {
+      console.error("Error initiating summary generation:", error);
+      setError(error instanceof Error ? error.message : 'An unknown error occurred');
+    }
+  };
+
+  const generateQuiz = async () => {
+    if (text.trim() === "") return;
+    setIsQuizLoading(true);
+    setError(null);
+    console.log("Generating: quiz");
+
+    try {
+      const response = await fetch("/api/quiz", {
+        method: "POST",
+        body: JSON.stringify({ text }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      console.log("Received quiz data:", data);
+      console.log(data.quiz);
+      if (!data) {
+        throw new Error("No quiz received from API");
+      }
+      setQuiz(data);
+      setIsQuizModalOpen(true); // Open the quiz modal
+    } catch (error) {
+      console.error("Error generating quiz:", error);
+      setError(
+        error instanceof Error ? error.message : "An unknown error occurred"
+      );
+    } finally {
+      setIsQuizLoading(false);
+    }
+  };
+
+  const handleSave = async (name: string, type: "flashcards" | "summary" | "quiz", content: any) => {
     if (!user) {
-      console.error("User not authenticated");
+      console.error('User not authenticated');
       return;
     }
 
-    setProjectTitle(name);
-
     const batch = writeBatch(db);
-    const userDocRef = doc(collection(db, "users"), user.id);
+    const userDocRef = doc(collection(db, 'users'), user.id);
+    const docSnap = await getDoc(userDocRef);
 
-    try {
-      const docSnap = await getDoc(userDocRef);
-
-      // Create/merge flashcards
-      if (docSnap.exists()) {
-        const collections = docSnap.data().flashcards || [];
+    if (docSnap.exists()) {
+      const collections = docSnap.data().flashcards || [];
+      if (collections.find((f: any) => f.name === name)) {
+        alert('Set name already exists');
+        return;
+      } else {
         collections.push({ name, type });
         batch.set(userDocRef, { flashcards: collections }, { merge: true });
-      } else {
-        batch.set(userDocRef, { flashcards: [{ name, type }] });
       }
+    } else {
+      batch.set(userDocRef, { flashcards: [{ name, type }] });
+    }
 
-      // Save flashcards/summary/quiz
-      const colRef = collection(userDocRef, name);
-      if (type === "flashcards") {
-        flashcards.forEach((flashcard: Flashcard) => {
-          const cardDocRef = doc(colRef);
-          batch.set(cardDocRef, flashcard);
-        });
-      } else if (type === "summary") {
-        const summaryDocRef = doc(colRef, "summary");
-        batch.set(summaryDocRef, { content: summary });
-      } else if (type === "quiz") {
-        quiz.forEach((question: Question) => {
-          const questionDocRef = doc(colRef); // Let Firestore generate a unique ID
-          batch.set(questionDocRef, question);
-        });
-      }
+    const colRef = collection(userDocRef, name);
+    if (type === "flashcards") {
+      content.forEach((flashcard: Flashcard) => {
+        const cardDocRef = doc(colRef);
+        batch.set(cardDocRef, flashcard);
+      });
+    } else if (type === "summary") {
+      const summaryDocRef = doc(colRef, "summary");
+      batch.set(summaryDocRef, { content: summary });
+    } else if (type === "quiz") {
+      quiz.forEach((question: Question) => {
+        const questionDocRef = doc(colRef);
+        batch.set(questionDocRef, question);
+      });
+    }
 
-      // Commit batch
+    try {
       await batch.commit();
-
-      // Close modals based on type
+      console.log(`${type} saved successfully`);
       if (type === "flashcards") {
         setIsFlashcardModalOpen(false);
       } else if (type === "summary") {
@@ -141,11 +204,7 @@ const GeneratePage = () => {
       }
     } catch (error) {
       console.error(`Error saving ${type}:`, error);
-      setError(
-        error instanceof Error
-          ? error.message
-          : "An unknown error occurred while saving"
-      );
+      setError(error instanceof Error ? error.message : 'An unknown error occurred while saving');
     }
   };
 
@@ -180,11 +239,7 @@ const GeneratePage = () => {
               title={(isQuizLoading || isSummaryLoading || isFlashcardLoading) ? "Generating..." : `Generate ${format && (format[0].toUpperCase() + format.slice(1))}`}
               icon={(isQuizLoading || isSummaryLoading || isFlashcardLoading) ? <Loader2 className="animate-spin" size={16} /> : <ArrowRight size={16} />}
               position="right"
-              onClick={() => {
-                if (format === "quiz") return generateContent("/api/quiz", setQuiz, setIsQuizModalOpen, setIsQuizLoading);
-                if (format === "flashcards") return generateContent("/api/generate", setFlashcards, setIsFlashcardModalOpen, setIsFlashcardLoading);
-                if (format === "summary") return generateContent("/api/summarize", setSummary, setIsSummaryModalOpen, setIsSummaryLoading);
-              }}
+              onClick={format === "quiz" ? generateQuiz : format === "summary" ? generateSummary : generateFlashcards}
               disabled={!text || !format || isFlashcardLoading || isSummaryLoading || isQuizLoading || text.trim() === ""}
             />
           </div>
@@ -193,8 +248,8 @@ const GeneratePage = () => {
             isOpen={isFlashcardModalOpen}
             onClose={() => setIsFlashcardModalOpen(false)}
             items={flashcards}
-            onSave={(name) => handleSave(name, "flashcards")}
-            onRegenerate={() => generateContent("/api/generate", setFlashcards, setIsFlashcardModalOpen, setIsFlashcardLoading)}
+            onSave={(name) => handleSave(name, "flashcards", flashcards)}
+            onRegenerate={generateFlashcards}
             isLoading={isFlashcardLoading}
             title="Flashcard Preview"
             projectNames={projectNames}
@@ -203,20 +258,19 @@ const GeneratePage = () => {
           <SummaryPreviewModal
             isOpen={isSummaryModalOpen}
             onClose={() => setIsSummaryModalOpen(false)}
-            summary={summary}
-            error={error}
-            onSave={(name) => handleSave(name, "summary")}
-            onRegenerate={() => generateContent("/api/summarize", setSummary, setIsSummaryModalOpen, setIsSummaryLoading)}
+            onSave={(name, summary) => handleSave(name, "summary", summary)}
+            onRegenerate={generateSummary}
             isLoading={isSummaryLoading}
-            projectNames={projectNames}
+            onLoadingComplete={() => setIsSummaryLoading(false)}
+            text={text}
           />
 
           <QuizPreviewModal
             isOpen={isQuizModalOpen}
             onClose={() => setIsQuizModalOpen(false)}
             quiz={quiz}
-            onSave={(name) => handleSave(name, "quiz")}
-            onRegenerate={() => generateContent("/api/quiz", setQuiz, setIsQuizModalOpen, setIsQuizLoading)}
+            onSave={(name) => handleSave(name, "quiz", quiz)}
+            onRegenerate={() => generateQuiz}
             isLoading={isQuizLoading}
             projectNames={projectNames}
           />

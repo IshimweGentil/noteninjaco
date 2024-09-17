@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import OpenAI from "openai";
+import {createStream} from "@/utils/streamUtil"
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -26,7 +27,7 @@ Quiz Format:
     options?: { [key: string]: string }; // Only used for 'mc' and 'sm' types
     answer: string; // if options, use index starting with 0 to convert to character starting from A for the answer
   }
-- Output: In JSON format only consisting of Question[]. Make sure it is JSON parsable.
+- Output: In JSON format only consisting of Question[]. Make sure it is JSON parsable, instead of new line spacings, use \\n or space.
 
 Example:
 Example Input: Dynamic Programming.

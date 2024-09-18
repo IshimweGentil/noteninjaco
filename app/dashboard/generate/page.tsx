@@ -152,6 +152,7 @@ const GeneratePage = () => {
       console.error('User not authenticated');
       return;
     }
+    console.log(content);
 
     const batch = writeBatch(db);
     const userDocRef = doc(collection(db, 'users'), user.id);
@@ -177,8 +178,8 @@ const GeneratePage = () => {
         batch.set(cardDocRef, flashcard);
       });
     } else if (type === "summary") {
-      const summaryDocRef = doc(colRef, "summary");
-      batch.set(summaryDocRef, { content: summary });
+      const summaryDocRef = doc(colRef, 'summary');
+      batch.set(summaryDocRef, { content });
     } else if (type === "quiz") {
       quiz.forEach((question: Question) => {
         const questionDocRef = doc(colRef);

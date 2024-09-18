@@ -54,6 +54,7 @@ export default function RootLayout({
 
               gtag('config', 'G-3NLRJP26R0');
             `}
+            <link rel="icon" href="/logo.ico" />
           </Script>
         </head>
         <body className="bg-slate-950 text-white min-h-screen flex flex-col">

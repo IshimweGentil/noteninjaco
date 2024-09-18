@@ -7,6 +7,7 @@ import useScroll from '@/hooks/use-scroll';
 import { cn } from '@/lib/utils';
 import { useSelectedLayoutSegment } from 'next/navigation';
 
+
 const NavBar: React.FC = () => {
   const { isSignedIn } = useUser();
   const scrolled = useScroll(5);
@@ -34,20 +35,17 @@ const NavBar: React.FC = () => {
               <Link href="/dashboard/generate" className="hover:text-gray-300 transition duration-300">Dashboard</Link>
             )}
             {!isSignedIn ? (
-              <>
-                <SignInButton mode="modal" >
-                  <button className="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 transition duration-300">
-                    Sign In
-                  </button>
-                </SignInButton>
-              </>
+              <SignInButton mode="modal" >
+                <button className="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 transition duration-300">
+                  Sign In
+                </button>
+              </SignInButton>
             ) : (
               <UserButton afterSignOutUrl="/" />
             )}
           </div>
         </div>
       </div>
-
     </nav>
   );
 }

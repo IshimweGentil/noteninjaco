@@ -77,8 +77,9 @@ const SummaryPreviewModal: React.FC<SummaryPreviewModalProps> = ({
         })
         .then(stream => new Response(stream))
         .then(response => response.text())
-        .then(() => {
-          console.log("Streaming completed successfully");
+        .then(text => {
+          setSummary(text)
+          // console.log("Streaming completed successfully: " + text);
         })
         .catch(err => {
           if (err.name !== 'AbortError') {
@@ -99,7 +100,9 @@ const SummaryPreviewModal: React.FC<SummaryPreviewModalProps> = ({
   if (!isOpen) return null;
 
   const handleSave = () => {
+    console.log("handle Save")
     if (name.trim() && summary) {
+      console.log('summaru: ', summary)
       onSave(name, summary);
       setShowSuccessMessage(true);
       setTimeout(() => {

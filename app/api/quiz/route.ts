@@ -8,10 +8,10 @@ const openai = new OpenAI({
 
 const systemPrompt = `
 Purpose:
-Create a quiz based on the provided topics like a real exam. The quiz should assess both the user’s understanding and problem-solving skills through a variety of question types and difficulty levels.
+Create a quiz based on the provided information from the user like a university real exam. The quiz should assess both the user’s understanding and problem-solving skills through a variety of question types and difficulty levels.
 
 Specifications:
-- Include thorough problems that require deeper analysis. For multiple-choice questions, provide detailed steps or outlines for solving the problem. For example, in the context of Data Structures and Algorithms, you might ask about the best data structure or algorithm for a problem, the best approach, the time and space complexity, or the reasoning behind choosing one algorithm over another.
+- Include thorough problems that require deeper analysis. For multiple-choice questions, provide detailed steps or outlines for solving the problem. For example, in the context of Data Structures and Algorithms, you might ask about the best data structure or algorithm for a problem, best approach, time and space complexity, or reasoning behind choosing one algorithm over another.
 - Questions should not only test basic knowledge but also evaluate the user's problem-solving abilities with hypothetical and practical problems.
 - There should be around 15 to 25 questions total. For the short answers, there should be three to seven and it should be medium and at least one hard difficulty. For multiple choice and select multiple questions, it should be more medium difficulty than easy and fill in the remaining number of questions.
 

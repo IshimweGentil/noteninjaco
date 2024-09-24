@@ -213,10 +213,11 @@ const GeneratePage = () => {
         <h1 className="mb-4 font-bold text-xl">Welcome, {user.firstName || "User"}!</h1>
         <div>
           <TextTab text={text} setText={setText} AudioTab={AudioTab} />
+          
           <div className="flex flex-col gap-2">
             <label htmlFor="subject-format-select">Study Format:</label>
             <select
-              className="p-1 w-fit text-black"
+              className="p-1 w-fit text-white bg-gray-900 border border-gray-700 rounded-md"
               name="subject-format"
               id="subject-format-select"
               value={format}
@@ -227,6 +228,7 @@ const GeneratePage = () => {
               <option value="summary">Summary</option>
               <option value="quiz">Quiz</option>
             </select>
+
             <FileUploadArea className="mt-2" setText={setText} />
           </div>
           <div className="flex flex-col sm:flex-row justify-start space-y-2 sm:space-y-0 sm:space-x-4 mt-4">

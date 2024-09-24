@@ -8,8 +8,11 @@ import { collection, doc, getDocs, getDoc } from 'firebase/firestore';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import BackIcon from '@/components/ui/BackIcon';
 import { HoverEffect, Card, CardTitle, CardDescription } from '@/components/ui/card-hover-effect';
+import { ProjectChat } from '@/components/ProjectChat';
 import ChatButton from '@/components/ChatButton';
-import { Chat } from '@/components/Chat';
+import { IconRobot } from '@tabler/icons-react';
+import { Question } from '@/types/quiz';
+import Quiz from "@/components/Quiz"
 
 
 interface Tab {
@@ -58,20 +61,14 @@ const StudySetPage = () => {
   const setName = decodeURIComponent(params.setName as string);
   const [flashcards, setFlashcards] = useState<Flashcard[]>([]);
   const [summary, setSummary] = useState<Summary | null>(null);
+  const [quiz, setQuiz] = useState<Question[] | null>(null);
   const [flipped, setFlipped] = useState<{ [key: string]: boolean }>({});
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('single');
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
-  const [setType, setSetType] = useState<'flashcards' | 'summary'>('flashcards');
-  const [isVisible, setIsVisible] = useState(false);
-
-  const toggleVisibility = useCallback(() => {
-    setIsVisible(prevState => !prevState);
-  }, []);
-  
-  const closeChat = useCallback(() => {
-    setIsVisible(false);
-  }, []);
+  const [setType, setSetType] = useState<'flashcards' | 'summary' | 'quiz'>('flashcards');
+  const [isChatVisible, setIsChatVisible] = useState(false);
+  const [quizAnswers, setQuizAnswers] = useState<{ [questionId: number]: string[] }>({}); // Track user's answers
 
   useEffect(() => {
     async function getStudySet() {
@@ -88,20 +85,31 @@ const StudySetPage = () => {
           const summaryDocRef = doc(colRef, 'summary');
           const summaryDocSnap = await getDoc(summaryDocRef);
           setSummary(summaryDocSnap.data() as Summary);
-        } else {
+        } else if (setInfo?.type === 'flashcards') {
           const docs = await getDocs(colRef);
           const fetchedFlashcards: Flashcard[] = docs.docs.map(doc => ({ id: doc.id, ...doc.data() } as Flashcard));
           setFlashcards(fetchedFlashcards);
+        } else if (setInfo?.type === 'quiz') {
+          const docs = await getDocs(colRef);
+          const fetchedQuestions: Question[] = docs.docs.map(doc => doc.data() as Question);
+          setQuiz(fetchedQuestions);
         }
       } catch (error) {
         console.error("Error fetching study set:", error);
-        // Handle error (e.g., show error message to user)
       } finally {
         setIsLoading(false);
       }
     }
     getStudySet();
   }, [user, setName]);
+
+  const toggleVisibility = useCallback(() => {
+    setIsChatVisible(prevState => !prevState);
+  }, []);
+
+  const closeChat = useCallback(() => {
+    setIsChatVisible(false);
+  }, []);
 
   const handleCardClick = useCallback((id: string) => {
     setFlipped(prev => ({ ...prev, [id]: !prev[id] }));
@@ -117,8 +125,14 @@ const StudySetPage = () => {
     setFlipped({});
   }, [flashcards.length]);
 
+  const handleAnswerChange = (questionId: number, answer: string) => {
+    setQuizAnswers(prev => ({
+      ...prev,
+      [questionId]: [...(prev[questionId] || []), answer]
+    }));
+  };
+
   const formatSummary = (text: string) => {
-    // Replace [important] tags with styled spans
     let formattedText = text.replace(
       /\[important\](.*?)\[\/important\]/g, 
       '<span class="bg-blue-100 text-black px-1 rounded font-semibold">$1</span>'
@@ -159,8 +173,6 @@ const StudySetPage = () => {
       description: flashcard.back,
       link: '#',
     }));
-
-    
 
     return (
       <HoverEffect 
@@ -243,18 +255,30 @@ const StudySetPage = () => {
     </div>
   );
 
+  const renderQuizView = () => (
+    <div className="w-full mx-auto">
+      <Quiz quiz={quiz}/>
+    </div>
+  );
+
   return (
     <div className="container mx-auto px-4">
+      {/* <ChatButton icon={<IconRobot size={28} />} onClick={toggleVisibility} isVisible={isChatVisible} />
+      {isChatVisible && <ProjectChat isVisible={isChatVisible} setIsVisible={setIsChatVisible} closeChat={closeChat} />} */}
       {setType === 'flashcards' && (
         <div className="mb-2">
           <Tabs tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} />
         </div>
       )}
-      <h1 className="text-2xl mt-4 font-bold mb-6">Studying: {setName}</h1>
+      <h1 className="text-2xl mt-4 font-bold mb-6">{setType[0].toUpperCase() + setType.slice(1)}: {setName[0].toUpperCase() + setName.slice(1)}</h1>
       <div className="mt-6">
         {setType === 'flashcards' 
           ? (activeTab === 'grid' ? renderGridView() : renderSingleCardView())
-          : renderSummaryView()
+          : setType === 'summary'
+          ? renderSummaryView()
+          : setType === 'quiz'
+          ? renderQuizView()
+          : null
         }
       </div>
       <div className="mt-6">
@@ -263,7 +287,7 @@ const StudySetPage = () => {
           onClick={() => router.push('/dashboard/study')}
         >
           <BackIcon className="h-5 w-5 mr-2" />
-          Back to Flashcard Sets
+          Back to Study Sets
         </div>
       </div>
       {/* <ChatButton onClick={toggleVisibility} isVisible={isVisible} />

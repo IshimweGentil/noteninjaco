@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import Sidebar from '@/components/Sidebar'; // Update the path as needed
+import Sidebar from '@/components/Sidebar';
 import PageWrapper from '@/components/PageWrapper';
 import MarginWidthWrapper from '@/components/MarginWidthWrapper';
 

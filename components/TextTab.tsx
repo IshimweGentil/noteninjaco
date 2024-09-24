@@ -14,7 +14,7 @@ const TextTab: React.FC<TextTabProps> = ({ text, setText, AudioTab }) => {
         <textarea
           onChange={(e) => setText(e.target.value)}
           placeholder="Enter your text here..."
-          className="w-full h-64 p-2 pb-12 border-2 border-gray-600 rounded-md bg-transparent resize-y"
+          className="w-full h-64 p-2 pb-12 border-2 max-h-[60vh] border-gray-600 rounded-md bg-transparent resize-y"
           rows={15}
           value={text}
         />

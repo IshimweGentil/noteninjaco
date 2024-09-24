@@ -89,7 +89,7 @@ const StudyPage: React.FC = () => {
 
   const hoverEffectItems = flashcardSets.map(set => ({
     title: set.name,
-    description: `${set.name} set`,
+    description: set.type ?? '',
     link: `/dashboard/study/${encodeURIComponent(set.name)}`
   }));
 

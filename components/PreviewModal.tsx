@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { XIcon, ArrowRight, Loader2, CheckCircle } from 'lucide-react';
 import { motion, AnimatePresence } from "framer-motion";
 import MagicButton from './ui/MagicButton';
+
 
 interface PreviewItem {
   front: string;
@@ -16,6 +17,7 @@ interface PreviewModalProps {
   onRegenerate: () => void;
   isLoading: boolean;
   title?: string;
+  projectNames?: string[];
 }
 
 const PreviewModal: React.FC<PreviewModalProps> = ({
@@ -26,6 +28,7 @@ const PreviewModal: React.FC<PreviewModalProps> = ({
   onRegenerate,
   isLoading,
   title = 'Preview',
+  projectNames= []
 }) => {
   const [name, setName] = useState('');
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -137,12 +140,18 @@ const PreviewModal: React.FC<PreviewModalProps> = ({
 
             <div className="mb-4">
               <input
+                list="projects"
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Enter set name"
                 className="w-full px-3 py-2 bg-slate-800 text-blue-100 border border-slate-700 rounded focus:outline-none focus:border-blue-500"
               />
+              <datalist id="projects">
+                {projectNames.map((name) => (
+                  <option key={name} value={name} />
+                ))}
+              </datalist>
             </div>
 
             <div className="flex justify-end space-x-2">

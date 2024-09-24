@@ -55,6 +55,9 @@ export default function RootLayout({
               gtag('config', 'G-3NLRJP26R0');
             `}
           </Script>
+          <meta name="description" content="NoteNinja provides interactive study online for students!" />
+          <link rel="icon" href="./app/logo.ico" />
+          <title>NoteNinjaCo</title>
         </head>
         <body className="bg-slate-950 text-white min-h-screen flex flex-col">
           <div className="flex">

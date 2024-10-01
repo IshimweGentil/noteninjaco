@@ -11,6 +11,7 @@ import { Trash2 } from 'lucide-react';
 
 interface FlashcardSet {
   name: string;
+  type?: string;
 }
 
 const StudyPage: React.FC = () => {

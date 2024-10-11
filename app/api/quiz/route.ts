@@ -30,8 +30,8 @@ Quiz Format:
 - Output: In JSON format only consisting of Question[]. Make sure it is JSON parsable, instead of new line spacings, use \\n or space.
 
 Example:
-Example Input: Dynamic Programming.
-Example Output (JSON format):
+Input (Text): Dynamic Programming.
+Output (JSON - Question[]):
 [
   {
     "type": "sm",

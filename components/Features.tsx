@@ -37,7 +37,7 @@ const Features = () => {
   ];
 
   return (
-    <section className="py-20 mb-10">
+    <section id="features" className="py-20 mb-10">
       <h2 className="text-3xl font-bold text-blue-100 text-center mb-12">Key Features</h2>
       <BentoGrid className="max-w-4xl mx-auto ">
         {featureItems.map((item, i) => (

@@ -53,7 +53,7 @@ const Pricing: React.FC = () => {
   };
 
   return (
-    <section className="py-12 px-4 mb-10 sm:px-6 lg:px-8">
+    <section id="pricing" className="py-12 px-4 mb-10 sm:px-6 lg:px-8">
       <h2 className="text-2xl sm:text-3xl font-bold text-blue-100 text-center mb-8 sm:mb-12">Pricing Plans</h2>
       <div className="flex flex-col md:flex-row md:justify-center md:space-x-4 space-y-8 md:space-y-0 max-w-2xl mx-auto">
         <PricingCard 

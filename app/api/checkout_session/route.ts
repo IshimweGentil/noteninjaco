@@ -74,3 +74,14 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: { message: error.message } }, { status: 500 })
   }
 }
+
+// // Create a payment intent and split the funds
+// const paymentIntent = await stripe.paymentIntents.create({
+//   amount: 10000, // Amount in cents (e.g., $100)
+//   currency: 'usd',
+//   payment_method_types: ['card'],
+//   transfer_data: {
+//     destination: 'acct_sellerStripeAccountID', // Seller's Stripe account ID
+//   },
+//   application_fee_amount: 1000, // Platform fee (e.g., $10)
+// });
